@@ -1,8 +1,8 @@
-using AzureDriftDetector.Models;
+using DriftGuard.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace AzureDriftDetector.Services;
+namespace DriftGuard.Services;
 
 public class ReportingService
 {
@@ -31,7 +31,7 @@ public class ReportingService
         
         Console.WriteLine();
         Console.WriteLine(new string('=', 60));
-        Console.WriteLine($"{(simpleOutput ? "[DRIFT REPORT]" : "🔍")} AZURE CONFIGURATION DRIFT DETECTION REPORT");
+        Console.WriteLine($"{(simpleOutput ? "[DRIFT REPORT]" : "🔍")} AZURE DRIFTGUARD - CONFIGURATION DRIFT DETECTION REPORT");
         Console.WriteLine(new string('=', 60));
         Console.WriteLine($"{(simpleOutput ? "[TIME]" : "📅")} Detection Time: {result.DetectedAt:yyyy-MM-dd HH:mm:ss} UTC");
         Console.WriteLine($"{(simpleOutput ? "[SUMMARY]" : "📊")} Summary: {result.Summary}");
@@ -195,7 +195,7 @@ public class ReportingService
 </head>
 <body>
     <div class='header'>
-        <h1>{statusIcon} Azure Configuration Drift Detection Report</h1>
+        <h1>{statusIcon} Azure DriftGuard - Configuration Drift Detection Report</h1>
         <p><strong>Detection Time:</strong> {result.DetectedAt:yyyy-MM-dd HH:mm:ss} UTC</p>
         <p><strong>Summary:</strong> <span class='{statusClass}'>{result.Summary}</span></p>
     </div>
@@ -241,7 +241,7 @@ public class ReportingService
         var statusIcon = result.HasDrift ? "❌" : "✅";
         
         var markdown = $"""
-        # {statusIcon} Azure Configuration Drift Detection Report
+        # {statusIcon} Azure DriftGuard - Configuration Drift Detection Report
         
         **Detection Time:** {result.DetectedAt:yyyy-MM-dd HH:mm:ss} UTC  
         **Summary:** {result.Summary}

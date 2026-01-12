@@ -1,7 +1,7 @@
-using AzureDriftDetector.Models;
-using AzureDriftDetector.Services;
+using DriftGuard.Models;
+using DriftGuard.Services;
 
-namespace AzureDriftDetector.Core;
+namespace DriftGuard.Core;
 
 public class DriftDetector
 {

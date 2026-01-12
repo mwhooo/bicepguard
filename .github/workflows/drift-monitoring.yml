@@ -27,7 +27,7 @@ jobs:
     strategy:
       matrix:
         environment: 
-          - { name: 'dev', resource_group: 'dev', template: 'samples/main-template.bicepparam' }
+          - { name: 'dev', resource_group: 'rg-driftguard-dev', template: 'samples/main-template.bicepparam' }
       fail-fast: false
       
     name: Monitor ${{ matrix.environment.name }}
@@ -53,8 +53,8 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: Build Drift Detector
-      run: dotnet build AzureDriftDetector.csproj --configuration Release
+    - name: Build DriftGuard
+      run: dotnet build DriftGuard.csproj --configuration Release
 
     - name: Check Drift
       id: check

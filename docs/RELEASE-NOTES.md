@@ -1,5 +1,43 @@
 # Release Notes
 
+## Version 4.0.0 - Azure DriftGuard Rebrand (2026-01-12)
+
+### 🎯 Summary
+Major release introducing the **Azure DriftGuard** rebrand to clearly identify this as an Azure-specific configuration drift detection tool.
+
+### ✨ Branding Changes
+
+#### 🌐 Azure DriftGuard Identity
+- **Product Renamed**: From "DriftGuard" to "Azure DriftGuard" throughout all user-facing surfaces
+- **CLI Banner**: Updated to "Azure DriftGuard v4.0.0"
+- **Console Reports**: Header now shows "AZURE DRIFTGUARD - CONFIGURATION DRIFT DETECTION REPORT"
+- **HTML Reports**: Title updated to "Azure DriftGuard - Configuration Drift Detection Report"
+- **Markdown Reports**: Header updated with Azure branding
+- **Assembly Metadata**: Product name in .csproj updated
+
+### 📝 Why the Change?
+This tool is purpose-built for Azure infrastructure drift detection using:
+- Azure CLI for resource queries
+- Azure What-If deployments for drift analysis
+- Bicep/ARM template comparison
+- Azure-specific ignore patterns
+
+The "Azure" prefix makes this clear to users and distinguishes it from generic drift detection tools.
+
+### 🔧 Technical Details
+- Updated `Program.cs` root command description and version banner
+- Updated `ReportingService.cs` for Console, HTML, and Markdown reports
+- Updated `DriftGuard.csproj` Product metadata
+- Updated `README.md` title and branding
+- Internal namespaces remain `DriftGuard` for code compatibility
+
+### 📦 Migration Notes
+- No breaking changes to CLI arguments or configuration files
+- All existing `drift-ignore.json` configurations remain compatible
+- Output format unchanged, only branding text updated
+
+---
+
 ## Version 3.7.0 - JSON-Based What-If Parsing & Audit Mode (2025-12-11)
 
 ### 🎯 Summary

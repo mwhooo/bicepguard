@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Text.Json;
-using AzureDriftDetector.Models;
+using DriftGuard.Models;
 
-namespace AzureDriftDetector.Services;
+namespace DriftGuard.Services;
 
 /// <summary>
 /// Service to parse what-if JSON output for drift detection.

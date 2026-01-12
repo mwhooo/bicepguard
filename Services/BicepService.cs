@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Newtonsoft.Json.Linq;
 
-namespace AzureDriftDetector.Services;
+namespace DriftGuard.Services;
 
 public class BicepService
 {

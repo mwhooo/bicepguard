@@ -1,6 +1,6 @@
 # Documentation
 
-This directory contains comprehensive documentation for the Azure Configuration Drift Detector.
+This directory contains comprehensive documentation for DriftGuard.
 
 ## Available Documentation
 
@@ -19,10 +19,10 @@ This directory contains comprehensive documentation for the Azure Configuration 
 Configuration guide for GitHub Advanced Security features including CodeQL analysis and dependency scanning.
 
 ### [Bicep Module Development Guide](BICEP-BUILD.md)
-Documentation for developing and maintaining the modular Bicep templates used by the drift detector.
+Documentation for developing and maintaining the modular Bicep templates used by DriftGuard.
 
 ### [Release Notes](RELEASE-NOTES.md)
-Version history and changelog for the Azure Configuration Drift Detector.
+Version history and changelog for DriftGuard.
 
 ### [Monitoring Setup](MONITORING.md)
 Guide for setting up automated drift monitoring with GitHub Actions.

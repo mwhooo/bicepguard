@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using System.Text.Json;
-using AzureDriftDetector.Models;
+using DriftGuard.Models;
 using Newtonsoft.Json.Linq;
 
-namespace AzureDriftDetector.Services;
+namespace DriftGuard.Services;
 
 public class AzureCliService
 {

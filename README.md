@@ -1,4 +1,4 @@
-# Azure Configuration Drift Detector
+# Azure DriftGuard
 
 A sophisticated C# console application that detects configuration drift between Bicep/ARM templates and live Azure resources. Built for DevOps teams practicing Infrastructure as Code (IaC) to ensure deployed resources match their intended configuration.
 
@@ -11,7 +11,7 @@ Configuration drift occurs when live Azure resources diverge from their Infrastr
 - Azure policy enforcement
 - Resource auto-scaling or auto-updates
 
-The Azure Configuration Drift Detector helps maintain **IaC compliance** by identifying these deviations quickly and clearly.
+DriftGuard helps maintain **IaC compliance** by identifying these deviations quickly and clearly.
 
 ## ✨ Key Features
 
@@ -73,7 +73,7 @@ The Azure Configuration Drift Detector helps maintain **IaC compliance** by iden
 ### Installation
 ```bash
 git clone <your-repo>
-cd AzureDriftDetector
+cd DriftGuard
 dotnet build
 ```
 
@@ -617,7 +617,7 @@ Options:
 ## 🏛️ Architecture
 
 ```
-AzureDriftDetector/
+DriftGuard/
 ├── Core/
 │   └── DriftDetector.cs          # Main orchestration logic with ignore integration
 ├── Models/

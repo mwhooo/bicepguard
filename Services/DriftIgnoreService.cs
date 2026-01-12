@@ -1,8 +1,8 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using AzureDriftDetector.Models;
+using DriftGuard.Models;
 
-namespace AzureDriftDetector.Services;
+namespace DriftGuard.Services;
 
 public class DriftIgnoreService
 {
