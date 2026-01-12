@@ -8,7 +8,7 @@ class Program
 {
     static async Task<int> Main(string[] args)
     {
-        var rootCommand = new RootCommand("DriftGuard - Azure Configuration Drift Detector")
+        var rootCommand = new RootCommand("Azure DriftGuard - Configuration Drift Detector")
         {
             Description = "Detects configuration drift between Bicep/ARM templates and live Azure resources"
         };
@@ -92,7 +92,7 @@ class Program
                     return;
                 }
 
-                Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} DriftGuard v3.7.0");
+                Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} Azure DriftGuard v4.0.0");
                 Console.WriteLine($"{(simpleOutput ? "[FILE]" : "📄")} Bicep Template: {bicepFile.Name}");
                 Console.WriteLine($"{(simpleOutput ? "[RG]" : "🏗️")}  Resource Group: {resourceGroup}");
                 Console.WriteLine($"{(simpleOutput ? "[OUTPUT]" : "📊")} Output Format: {outputFormat}");

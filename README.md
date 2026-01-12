@@ -1,4 +1,4 @@
-# DriftGuard
+# Azure DriftGuard
 
 A sophisticated C# console application that detects configuration drift between Bicep/ARM templates and live Azure resources. Built for DevOps teams practicing Infrastructure as Code (IaC) to ensure deployed resources match their intended configuration.
 
