@@ -13,10 +13,10 @@ class Program
             Description = "Detects configuration drift between Bicep/ARM templates and live Azure resources"
         };
 
-        // Bicep file option
+        // Bicep file option (accepts both .bicep and .bicepparam files)
         var bicepFileOption = new Option<FileInfo>(
             name: "--bicep-file",
-            description: "Path to the Bicep template file");
+            description: "Path to the Bicep template file (.bicep) or parameters file (.bicepparam)");
         bicepFileOption.IsRequired = true;
 
         // Resource group option
