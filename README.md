@@ -2,6 +2,8 @@
 
 A sophisticated C# console application that detects configuration drift between Bicep/ARM templates and live Azure resources. Built for DevOps teams practicing Infrastructure as Code (IaC) to ensure deployed resources match their intended configuration.
 
+> 🔗 **Want to add drift detection to your Azure repos?** See our [Integration Guide](docs/INTEGRATION.md) for quick setup using reusable workflows.
+
 ## 🎯 Purpose
 
 Configuration drift occurs when live Azure resources diverge from their Infrastructure as Code definitions. This can happen through:

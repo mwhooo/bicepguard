@@ -1,0 +1,257 @@
+name: Reusable Drift Detection
+
+on:
+  workflow_call:
+    inputs:
+      bicep-file:
+        description: 'Path to the Bicep template or .bicepparam file'
+        required: true
+        type: string
+      resource-group:
+        description: 'Azure resource group to check for drift'
+        required: true
+        type: string
+      environment-name:
+        description: 'Environment name (e.g., dev, staging, prod) for reporting'
+        required: false
+        type: string
+        default: 'production'
+      driftguard-version:
+        description: 'DriftGuard version to use'
+        required: false
+        type: string
+        default: 'v4.0.0'
+      autofix:
+        description: 'Automatically fix drift by deploying template'
+        required: false
+        type: boolean
+        default: false
+      create-issue:
+        description: 'Create GitHub issue when drift is detected'
+        required: false
+        type: boolean
+        default: true
+      ignore-config:
+        description: 'Path to custom drift-ignore.json file'
+        required: false
+        type: string
+        default: ''
+    secrets:
+      AZURE_CLIENT_ID:
+        description: 'Azure Service Principal Client ID'
+        required: true
+      AZURE_TENANT_ID:
+        description: 'Azure Tenant ID'
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        description: 'Azure Subscription ID'
+        required: true
+    outputs:
+      drift-detected:
+        description: 'Whether drift was detected'
+        value: ${{ jobs.detect-drift.outputs.drift-detected }}
+      drift-count:
+        description: 'Number of resources with drift'
+        value: ${{ jobs.detect-drift.outputs.drift-count }}
+
+permissions:
+  contents: read
+  issues: write
+  id-token: write
+
+jobs:
+  detect-drift:
+    name: 🔍 Detect Drift
+    runs-on: ubuntu-latest
+    outputs:
+      drift-detected: ${{ steps.drift.outputs.drift_detected }}
+      drift-count: ${{ steps.drift.outputs.drift_count }}
+
+    steps:
+    - name: 📥 Checkout Repository
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+    - name: 📦 Download DriftGuard
+      run: |
+        echo "Downloading DriftGuard ${{ inputs.driftguard-version }}..."
+        curl -Lo driftguard.tar.gz "https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/releases/download/${{ inputs.driftguard-version }}/driftguard-linux-x64.tar.gz" || {
+          echo "Binary not found, downloading source and building..."
+          curl -Lo driftguard.zip "https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/archive/refs/tags/${{ inputs.driftguard-version }}.zip"
+          unzip -q driftguard.zip
+          mv pe-az-driftguard-* driftguard-src
+        }
+
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: 🏗️ Build DriftGuard (if needed)
+      run: |
+        if [ -d "driftguard-src" ]; then
+          cd driftguard-src
+          dotnet build --configuration Release
+          echo "DRIFTGUARD_PATH=driftguard-src/bin/Release/net8.0/DriftGuard.dll" >> $GITHUB_ENV
+        elif [ -f "driftguard.tar.gz" ]; then
+          tar -xzf driftguard.tar.gz
+          chmod +x driftguard
+          echo "DRIFTGUARD_PATH=./driftguard" >> $GITHUB_ENV
+        fi
+
+    - name: 🔧 Install Bicep CLI
+      run: |
+        curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
+        chmod +x ./bicep
+        sudo mv ./bicep /usr/local/bin/bicep
+        bicep --version
+
+    - name: 🔐 Azure Login (OIDC)
+      uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: 🔍 Run Drift Detection
+      id: drift
+      run: |
+        set +e
+        
+        IGNORE_CONFIG=""
+        if [ -n "${{ inputs.ignore-config }}" ] && [ -f "${{ inputs.ignore-config }}" ]; then
+          IGNORE_CONFIG="--ignore-config ${{ inputs.ignore-config }}"
+        fi
+        
+        AUTOFIX=""
+        if [ "${{ inputs.autofix }}" = "true" ]; then
+          AUTOFIX="--autofix"
+        fi
+        
+        if [[ "$DRIFTGUARD_PATH" == *.dll ]]; then
+          dotnet $DRIFTGUARD_PATH \
+            --bicep-file "${{ inputs.bicep-file }}" \
+            --resource-group "${{ inputs.resource-group }}" \
+            --output Json \
+            --simple-output \
+            $IGNORE_CONFIG \
+            $AUTOFIX \
+            > drift-report.json 2>&1
+        else
+          $DRIFTGUARD_PATH \
+            --bicep-file "${{ inputs.bicep-file }}" \
+            --resource-group "${{ inputs.resource-group }}" \
+            --output Json \
+            --simple-output \
+            $IGNORE_CONFIG \
+            $AUTOFIX \
+            > drift-report.json 2>&1
+        fi
+        
+        EXIT_CODE=$?
+        
+        if [ $EXIT_CODE -eq 0 ]; then
+          echo "drift_detected=false" >> $GITHUB_OUTPUT
+          echo "drift_count=0" >> $GITHUB_OUTPUT
+          echo "✅ No drift detected in ${{ inputs.environment-name }}"
+        else
+          echo "drift_detected=true" >> $GITHUB_OUTPUT
+          DRIFT_COUNT=$(cat drift-report.json | grep -o '"ResourcesWithDrift":' | wc -l || echo "1")
+          echo "drift_count=$DRIFT_COUNT" >> $GITHUB_OUTPUT
+          echo "❌ Drift detected in ${{ inputs.environment-name }}"
+        fi
+        
+        exit 0
+
+    - name: 📊 Upload Drift Report
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      with:
+        name: drift-report-${{ inputs.environment-name }}
+        path: drift-report.json
+        retention-days: 30
+
+    - name: 🐛 Create Issue on Drift
+      if: steps.drift.outputs.drift_detected == 'true' && inputs.create-issue == true
+      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('drift-report.json', 'utf8');
+          
+          const issueTitle = `🚨 Configuration Drift Detected - ${{ inputs.environment-name }}`;
+          const issueBody = `## Configuration Drift Detected
+          
+          **Environment:** ${{ inputs.environment-name }}
+          **Resource Group:** ${{ inputs.resource-group }}
+          **Bicep File:** ${{ inputs.bicep-file }}
+          **Detection Time:** ${new Date().toISOString()}
+          
+          ### Drift Report
+          \`\`\`json
+          ${report}
+          \`\`\`
+          
+          ### Remediation
+          Run the following command to fix the drift:
+          \`\`\`bash
+          dotnet run -- --bicep-file ${{ inputs.bicep-file }} --resource-group ${{ inputs.resource-group }} --autofix
+          \`\`\`
+          
+          Or re-deploy through your CI/CD pipeline.
+          `;
+          
+          // Check for existing open issue
+          const issues = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open',
+            labels: 'drift-detection,${{ inputs.environment-name }}'
+          });
+          
+          if (issues.data.length > 0) {
+            // Update existing issue
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issues.data[0].number,
+              body: `## Updated Drift Report\n\n**Time:** ${new Date().toISOString()}\n\n\`\`\`json\n${report}\n\`\`\``
+            });
+          } else {
+            // Create new issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: ['drift-detection', '${{ inputs.environment-name }}']
+            });
+          }
+
+    - name: ✅ Close Issue if No Drift
+      if: steps.drift.outputs.drift_detected == 'false' && inputs.create-issue == true
+      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+      with:
+        script: |
+          const issues = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open',
+            labels: 'drift-detection,${{ inputs.environment-name }}'
+          });
+          
+          for (const issue of issues.data) {
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              state: 'closed',
+              state_reason: 'completed'
+            });
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: '✅ Drift has been resolved. Closing this issue.'
+            });
+          }
