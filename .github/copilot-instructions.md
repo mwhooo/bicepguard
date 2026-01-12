@@ -1,4 +1,4 @@
-# Azure Configuration Drift Detection Project
+# DriftGuard Project
 
 This C# console application compares Bicep/ARM template configurations with live Azure resources to detect configuration drift and automatically remediate it.
 

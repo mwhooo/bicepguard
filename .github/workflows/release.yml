@@ -60,7 +60,7 @@ jobs:
         git push origin "v${{ steps.version.outputs.version }}"
         
     - name: 📦 Restore dependencies
-      run: dotnet restore AzureDriftDetector.csproj
+      run: dotnet restore DriftGuard.csproj
       
     - name: 🏗️ Build release artifacts
       run: |
@@ -68,20 +68,20 @@ jobs:
         mkdir -p release-artifacts
         
         # Build for Windows x64
-        dotnet publish AzureDriftDetector.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./temp/win-x64
-        zip -r release-artifacts/AzureDriftDetector-${{ steps.version.outputs.version }}-win-x64.zip ./temp/win-x64/
+        dotnet publish DriftGuard.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./temp/win-x64
+        zip -r release-artifacts/DriftGuard-${{ steps.version.outputs.version }}-win-x64.zip ./temp/win-x64/
         
         # Build for Linux x64  
-        dotnet publish AzureDriftDetector.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o ./temp/linux-x64
-        tar -czf release-artifacts/AzureDriftDetector-${{ steps.version.outputs.version }}-linux-x64.tar.gz -C ./temp/linux-x64 .
+        dotnet publish DriftGuard.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o ./temp/linux-x64
+        tar -czf release-artifacts/DriftGuard-${{ steps.version.outputs.version }}-linux-x64.tar.gz -C ./temp/linux-x64 .
         
         # Build for macOS x64
-        dotnet publish AzureDriftDetector.csproj -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true -o ./temp/osx-x64
-        zip -r release-artifacts/AzureDriftDetector-${{ steps.version.outputs.version }}-osx-x64.zip ./temp/osx-x64/
+        dotnet publish DriftGuard.csproj -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true -o ./temp/osx-x64
+        zip -r release-artifacts/DriftGuard-${{ steps.version.outputs.version }}-osx-x64.zip ./temp/osx-x64/
         
         # Create portable .NET version (requires .NET runtime)
-        dotnet publish AzureDriftDetector.csproj -c Release --no-self-contained -o ./temp/portable
-        zip -r release-artifacts/AzureDriftDetector-${{ steps.version.outputs.version }}-portable.zip ./temp/portable/
+        dotnet publish DriftGuard.csproj -c Release --no-self-contained -o ./temp/portable
+        zip -r release-artifacts/DriftGuard-${{ steps.version.outputs.version }}-portable.zip ./temp/portable/
         
     - name: 📋 Generate release notes
       id: changelog
@@ -99,7 +99,7 @@ jobs:
         
         # Create release notes
         cat > release_notes.md << EOF
-        # Azure Configuration Drift Detector v${{ steps.version.outputs.version }}
+        # DriftGuard v${{ steps.version.outputs.version }}
         
         ## 🎯 What's New
         
@@ -113,16 +113,16 @@ jobs:
         
         Choose the appropriate package for your platform:
         
-        - **Windows x64**: \`AzureDriftDetector-${{ steps.version.outputs.version }}-win-x64.zip\` (Self-contained executable)
-        - **Linux x64**: \`AzureDriftDetector-${{ steps.version.outputs.version }}-linux-x64.tar.gz\` (Self-contained executable)
-        - **macOS x64**: \`AzureDriftDetector-${{ steps.version.outputs.version }}-osx-x64.zip\` (Self-contained executable)
-        - **Portable**: \`AzureDriftDetector-${{ steps.version.outputs.version }}-portable.zip\` (Requires .NET 8 runtime)
+        - **Windows x64**: \`DriftGuard-${{ steps.version.outputs.version }}-win-x64.zip\` (Self-contained executable)
+        - **Linux x64**: \`DriftGuard-${{ steps.version.outputs.version }}-linux-x64.tar.gz\` (Self-contained executable)
+        - **macOS x64**: \`DriftGuard-${{ steps.version.outputs.version }}-osx-x64.zip\` (Self-contained executable)
+        - **Portable**: \`DriftGuard-${{ steps.version.outputs.version }}-portable.zip\` (Requires .NET 8 runtime)
         
         ## 🚀 Quick Start
         
         1. Download the appropriate package for your platform
         2. Extract the archive
-        3. Run: \`./AzureDriftDetector --bicep-file template.bicep --resource-group myResourceGroup\`
+        3. Run: \`./DriftGuard --bicep-file template.bicep --resource-group myResourceGroup\`
         
         ## ✨ Key Features
         
@@ -147,7 +147,7 @@ jobs:
     - name: 🚀 Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        name: Azure Configuration Drift Detector v${{ steps.version.outputs.version }}
+        name: DriftGuard v${{ steps.version.outputs.version }}
         body: ${{ steps.changelog.outputs.release_notes }}
         files: release-artifacts/*
         draft: false

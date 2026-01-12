@@ -40,10 +40,10 @@ jobs:
         queries: security-extended,security-and-quality
 
     - name: 📦 Restore dependencies
-      run: dotnet restore AzureDriftDetector.csproj
+      run: dotnet restore DriftGuard.csproj
 
     - name: 🔧 Build project
-      run: dotnet build AzureDriftDetector.csproj --configuration Release --no-restore
+      run: dotnet build DriftGuard.csproj --configuration Release --no-restore
 
     - name: 🔍 Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4

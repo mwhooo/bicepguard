@@ -45,6 +45,6 @@ The CI workflow currently skips test execution but maintains the infrastructure 
 ```
 
 ## Files to Restore When Fixed
-- `tests/AzureDriftDetector.Tests/AzureDriftDetector.Tests.csproj`
-- `tests/AzureDriftDetector.Tests/UnitTest1.cs` (DriftIgnoreServiceTests)
-- `tests/AzureDriftDetector.Tests/ComparisonServiceTests.cs`
+- `tests/DriftGuard.Tests/DriftGuard.Tests.csproj`
+- `tests/DriftGuard.Tests/UnitTest1.cs` (DriftIgnoreServiceTests)
+- `tests/DriftGuard.Tests/ComparisonServiceTests.cs`

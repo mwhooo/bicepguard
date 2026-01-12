@@ -8,8 +8,8 @@
     <Version>3.6.0</Version>
     <AssemblyVersion>3.6.0.0</AssemblyVersion>
     <FileVersion>3.6.0.0</FileVersion>
-    <Product>Azure Configuration Drift Detector</Product>
-    <Description>Detects and automatically fixes configuration drift between Bicep templates and live Azure resources</Description>
+    <Product>DriftGuard</Product>
+    <Description>Detects configuration drift between Bicep templates and live Azure resources</Description>
   </PropertyGroup>
 
   <ItemGroup>

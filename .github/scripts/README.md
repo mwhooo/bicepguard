@@ -1,12 +1,12 @@
 # GitHub Actions Scripts
 
-This directory contains utility scripts used by the GitHub Actions workflows for the Azure Drift Detector project.
+This directory contains utility scripts used by the GitHub Actions workflows for DriftGuard.
 
 ## Scripts
 
 ### `check-drift.sh`
 
-**Purpose**: Executes the Azure Drift Detector and extracts JSON drift reports
+**Purpose**: Executes DriftGuard and extracts JSON drift reports
 
 **Usage**:
 ```bash

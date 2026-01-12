@@ -1,6 +1,6 @@
 # 📋 Sample Bicep Templates
 
-This directory contains example Bicep templates and parameter files for testing and demonstrating the Azure Drift Detector tool.
+This directory contains example Bicep templates and parameter files for testing and demonstrating DriftGuard.
 
 ## 📁 Contents
 

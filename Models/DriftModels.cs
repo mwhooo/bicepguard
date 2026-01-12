@@ -1,4 +1,4 @@
-namespace AzureDriftDetector.Models;
+namespace DriftGuard.Models;
 
 public enum OutputFormat
 {

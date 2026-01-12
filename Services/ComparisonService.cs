@@ -1,8 +1,8 @@
-using AzureDriftDetector.Models;
+using DriftGuard.Models;
 using Newtonsoft.Json.Linq;
 using JsonDiffPatchDotNet;
 
-namespace AzureDriftDetector.Services;
+namespace DriftGuard.Services;
 
 public class ComparisonService
 {
