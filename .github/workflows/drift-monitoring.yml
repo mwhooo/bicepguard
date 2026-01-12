@@ -1,0 +1,91 @@
+name: 🔍 Azure Drift Monitoring
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to check'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+        - dev
+        - staging
+        - prod
+
+permissions:
+  contents: read
+  issues: write
+  id-token: write  # Required for OIDC authentication
+
+jobs:
+  monitor-drift:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: 
+          - { name: 'dev', resource_group: 'rg-driftguard-dev', template: 'samples/main-template.bicepparam' }
+      fail-fast: false
+      
+    name: Monitor ${{ matrix.environment.name }}
+    
+    steps:
+    - uses: actions/checkout@v5
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Install Bicep CLI
+      run: |
+        curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64
+        chmod +x ./bicep
+        sudo mv ./bicep /usr/local/bin/bicep
+      
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Build DriftGuard
+      run: dotnet build DriftGuard.csproj --configuration Release
+
+    - name: Check Drift
+      id: check
+      continue-on-error: true
+      run: |
+        chmod +x .github/scripts/check-drift.sh
+        .github/scripts/check-drift.sh "${{ matrix.environment.template }}" "${{ matrix.environment.resource_group }}" "drift-report.json" "drift-ignore.json"
+    
+    - name: Upload Drift Report
+      if: always()
+      uses: actions/upload-artifact@v6
+      with:
+        name: drift-report-${{ matrix.environment.name }}
+        path: drift-report.json
+
+    - name: Create Issue on Drift
+      if: steps.check.outputs.drift == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { createDriftIssue } = require('./.github/scripts/create-drift-issue.js');
+          const environment = '${{ matrix.environment.name }}';
+          
+          const issueData = createDriftIssue(environment, context);
+          
+          await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: issueData.title,
+            body: issueData.body,
+            labels: issueData.labels
+          });
+          
+          console.log('✅ Created drift alert issue successfully');
