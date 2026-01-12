@@ -40,7 +40,7 @@ jobs:
       continue-on-error: true  # Continue even if tests fail for now
       
     - name: 📊 Upload test results
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       if: always()
       with:
         name: test-results
@@ -190,7 +190,7 @@ jobs:
         echo ".NET Version: ${{ env.DOTNET_VERSION }}" >> ./artifacts/BUILD_INFO.txt
         
     - name: 📤 Upload artifacts
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: release-artifacts
         path: ./artifacts/
