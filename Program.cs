@@ -92,7 +92,7 @@ class Program
                     return;
                 }
 
-                Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} Azure DriftGuard v4.0.0");
+                Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} Azure DriftGuard v4.0.1");
                 Console.WriteLine($"{(simpleOutput ? "[FILE]" : "📄")} Bicep Template: {bicepFile.Name}");
                 Console.WriteLine($"{(simpleOutput ? "[RG]" : "🏗️")}  Resource Group: {resourceGroup}");
                 Console.WriteLine($"{(simpleOutput ? "[OUTPUT]" : "📊")} Output Format: {outputFormat}");

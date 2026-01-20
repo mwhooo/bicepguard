@@ -1,5 +1,12 @@
 # Release Notes
 
+## Version 4.0.1 - Patch Release (2026-01-20)
+
+### 🐛 Bug Fixes & Improvements
+- Minor improvements and bug fixes
+
+---
+
 ## Version 4.0.0 - Azure DriftGuard Rebrand (2026-01-12)
 
 ### 🎯 Summary
