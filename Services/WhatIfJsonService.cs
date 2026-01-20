@@ -70,8 +70,11 @@ public class WhatIfJsonService
 
             Console.WriteLine($"✅ What-if analysis completed successfully");
             
+            // Extract JSON from output (skip non-JSON lines like Bicep CLI messages)
+            var jsonOutput = ExtractJsonFromOutput(output);
+            
             // Parse the JSON output
-            var result = ParseWhatIfJson(output);
+            var result = ParseWhatIfJson(jsonOutput);
             
             // Apply ignore filters if configured
             if (_ignoreService != null)
@@ -86,6 +89,19 @@ public class WhatIfJsonService
             Console.WriteLine($"❌ Error running what-if: {ex.Message}");
             throw;
         }
+    }
+
+    private string ExtractJsonFromOutput(string output)
+    {
+        // Find the first '{' which marks the start of JSON
+        var jsonStart = output.IndexOf('{');
+        if (jsonStart == -1)
+        {
+            return output; // No JSON found, return as is
+        }
+        
+        // Extract from first '{' to end
+        return output.Substring(jsonStart);
     }
 
     private DriftDetectionResult ParseWhatIfJson(string jsonOutput)
