@@ -63,25 +63,27 @@ jobs:
       run: dotnet restore DriftGuard.csproj
       
     - name: 🏗️ Build release artifacts
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
       run: |
         # Create output directory
         mkdir -p release-artifacts
         
-        # Build for Windows x64
-        dotnet publish DriftGuard.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./temp/win-x64
-        zip -r release-artifacts/DriftGuard-${{ steps.version.outputs.version }}-win-x64.zip ./temp/win-x64/
+        # Build for Windows x64 (inject version from git tag)
+        dotnet publish DriftGuard.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$VERSION -o ./temp/win-x64
+        zip -r release-artifacts/DriftGuard-${VERSION}-win-x64.zip ./temp/win-x64/
         
         # Build for Linux x64  
-        dotnet publish DriftGuard.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o ./temp/linux-x64
-        tar -czf release-artifacts/DriftGuard-${{ steps.version.outputs.version }}-linux-x64.tar.gz -C ./temp/linux-x64 .
+        dotnet publish DriftGuard.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$VERSION -o ./temp/linux-x64
+        tar -czf release-artifacts/DriftGuard-${VERSION}-linux-x64.tar.gz -C ./temp/linux-x64 .
         
         # Build for macOS x64
-        dotnet publish DriftGuard.csproj -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true -o ./temp/osx-x64
-        zip -r release-artifacts/DriftGuard-${{ steps.version.outputs.version }}-osx-x64.zip ./temp/osx-x64/
+        dotnet publish DriftGuard.csproj -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$VERSION -o ./temp/osx-x64
+        zip -r release-artifacts/DriftGuard-${VERSION}-osx-x64.zip ./temp/osx-x64/
         
         # Create portable .NET version (requires .NET runtime)
-        dotnet publish DriftGuard.csproj -c Release --no-self-contained -o ./temp/portable
-        zip -r release-artifacts/DriftGuard-${{ steps.version.outputs.version }}-portable.zip ./temp/portable/
+        dotnet publish DriftGuard.csproj -c Release --no-self-contained -p:Version=$VERSION -o ./temp/portable
+        zip -r release-artifacts/DriftGuard-${VERSION}-portable.zip ./temp/portable/
         
     - name: 📋 Generate release notes
       id: changelog

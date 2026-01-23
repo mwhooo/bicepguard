@@ -18,7 +18,8 @@ DriftGuard helps maintain **IaC compliance** by identifying these deviations qui
 ## ✨ Key Features
 
 ### 🔍 **Azure What-If Based Drift Detection**
-- **Azure-Native Comparison**: Uses Azure's `az deployment group what-if` for authoritative drift detection
+- **Azure-Native Comparison**: Uses Azure's `az deployment what-if` for authoritative drift detection
+- **Multi-Scope Support**: Works with both resource-group scope (`az deployment group`) and subscription scope (`az deployment sub`)
 - **Intelligent Noise Suppression**: Filters Azure platform behaviors with configurable ignore patterns
 - **Multi-Resource Support**: Works with any Azure resource type (VNets, Storage, Key Vault, App Services, NSGs, etc.)
 - **Property-Level Comparison**: Detects specific property changes with precise Expected vs Actual reporting
@@ -81,11 +82,14 @@ dotnet build
 
 ### Basic Usage
 ```bash
-# Detect drift using a Bicep template
+# Detect drift using a Bicep template (resource-group scope - default)
 dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup
 
 # Detect drift using a Bicepparam file
 dotnet run -- --bicep-file template.bicepparam --resource-group myResourceGroup
+
+# Detect drift for subscription-scope deployments (NEW in v5.0.0!)
+dotnet run -- --bicep-file infra.bicep --scope Subscription --subscription <subscription-id> --location westeurope
 
 # Detect drift and automatically fix it
 dotnet run -- --bicep-file template.bicepparam --resource-group myResourceGroup --autofix

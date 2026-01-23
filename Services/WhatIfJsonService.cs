@@ -7,6 +7,7 @@ namespace DriftGuard.Services;
 /// <summary>
 /// Service to parse what-if JSON output for drift detection.
 /// Uses --no-pretty-print to get structured JSON instead of text parsing.
+/// Supports both resource-group and subscription scope deployments.
 /// </summary>
 public class WhatIfJsonService
 {
@@ -19,8 +20,14 @@ public class WhatIfJsonService
 
     /// <summary>
     /// Runs az deployment what-if with JSON output and parses the results.
+    /// Supports both resource-group and subscription scope deployments.
     /// </summary>
-    public async Task<DriftDetectionResult> RunWhatIfAsync(string bicepFilePath, string resourceGroup)
+    public async Task<DriftDetectionResult> RunWhatIfAsync(
+        string bicepFilePath, 
+        DeploymentScope scope,
+        string? resourceGroup,
+        string? subscription,
+        string? location)
     {
         try
         {
@@ -32,16 +39,21 @@ public class WhatIfJsonService
             {
                 var referencedBicepFile = await GetReferencedBicepFileAsync(bicepFilePath);
                 templateFile = referencedBicepFile;
-                argumentsString = $"deployment group what-if --resource-group \"{resourceGroup}\" --template-file \"{referencedBicepFile}\" --parameters \"{bicepFilePath}\" --no-prompt --no-pretty-print -o json";
+                argumentsString = BuildWhatIfArguments(scope, referencedBicepFile, bicepFilePath, resourceGroup, subscription, location);
             }
             else
             {
                 templateFile = bicepFilePath;
-                argumentsString = $"deployment group what-if --resource-group \"{resourceGroup}\" --template-file \"{bicepFilePath}\" --no-prompt --no-pretty-print -o json";
+                argumentsString = BuildWhatIfArguments(scope, bicepFilePath, null, resourceGroup, subscription, location);
             }
 
+            var scopeDescription = scope == DeploymentScope.ResourceGroup 
+                ? $"resource group '{resourceGroup}'" 
+                : $"subscription '{subscription}'";
+            
             Console.WriteLine($"📋 Running what-if analysis (JSON mode)...");
             Console.WriteLine($"   Template: {Path.GetFileName(templateFile)}");
+            Console.WriteLine($"   Scope: {scopeDescription}");
 
             using var process = new Process
             {
@@ -70,8 +82,11 @@ public class WhatIfJsonService
 
             Console.WriteLine($"✅ What-if analysis completed successfully");
             
+            // Strip any non-JSON prefix (Azure CLI sometimes outputs messages before JSON)
+            var jsonOutput = ExtractJson(output);
+            
             // Parse the JSON output
-            var result = ParseWhatIfJson(output);
+            var result = ParseWhatIfJson(jsonOutput);
             
             // Apply ignore filters if configured
             if (_ignoreService != null)
@@ -85,6 +100,108 @@ public class WhatIfJsonService
         {
             Console.WriteLine($"❌ Error running what-if: {ex.Message}");
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Backward compatibility overload for resource-group scope.
+    /// </summary>
+    public Task<DriftDetectionResult> RunWhatIfAsync(string bicepFilePath, string resourceGroup)
+    {
+        return RunWhatIfAsync(bicepFilePath, DeploymentScope.ResourceGroup, resourceGroup, null, null);
+    }
+
+    /// <summary>
+    /// Extracts JSON from output that may contain non-JSON prefix text.
+    /// Azure CLI sometimes outputs messages like "Bicep CLI is already installed..." before JSON.
+    /// Uses validation to ensure we find actual valid JSON, not just a '{' or '[' in warning text.
+    /// </summary>
+    private static string ExtractJson(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output))
+        {
+            return output;
+        }
+
+        // Fast path: if the entire output is valid JSON, just return it
+        if (TryParseJson(output))
+        {
+            return output;
+        }
+
+        // Search for a valid JSON substring starting at each '{' or '['
+        for (var i = 0; i < output.Length; i++)
+        {
+            var ch = output[i];
+            if (ch != '{' && ch != '[')
+            {
+                continue;
+            }
+
+            var candidate = output.Substring(i);
+            if (TryParseJson(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        // Fall back to returning the original output if no valid JSON found
+        return output;
+    }
+
+    /// <summary>
+    /// Attempts to parse a string as JSON to validate it.
+    /// </summary>
+    private static bool TryParseJson(string text)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(text);
+            return true;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
+    private static string BuildWhatIfArguments(
+        DeploymentScope scope,
+        string templateFile,
+        string? parametersFile,
+        string? resourceGroup,
+        string? subscription,
+        string? location)
+    {
+        var parametersArg = !string.IsNullOrEmpty(parametersFile) 
+            ? $" --parameters \"{parametersFile}\"" 
+            : "";
+
+        if (scope == DeploymentScope.Subscription)
+        {
+            // Defensive check: subscription-scope deployments require a location
+            if (string.IsNullOrWhiteSpace(location))
+            {
+                throw new ArgumentException("Location is required for subscription-scope deployments.", nameof(location));
+            }
+
+            // Subscription-scope deployment: az deployment sub what-if
+            var subscriptionArg = !string.IsNullOrEmpty(subscription) 
+                ? $" --subscription \"{subscription}\"" 
+                : "";
+            
+            return $"deployment sub what-if --location \"{location}\"{subscriptionArg} --template-file \"{templateFile}\"{parametersArg} --no-prompt --no-pretty-print -o json";
+        }
+        else
+        {
+            // Defensive check: resource-group scope deployments require a resource group
+            if (string.IsNullOrWhiteSpace(resourceGroup))
+            {
+                throw new ArgumentException("Resource group is required for resource-group scope deployments.", nameof(resourceGroup));
+            }
+
+            // Resource-group scope deployment: az deployment group what-if
+            return $"deployment group what-if --resource-group \"{resourceGroup}\" --template-file \"{templateFile}\"{parametersArg} --no-prompt --no-pretty-print -o json";
         }
     }
 
@@ -439,16 +556,20 @@ public class WhatIfJsonService
                 if (match.Success)
                 {
                     var referencedFile = match.Groups[1].Value;
-                    var directory = Path.GetDirectoryName(bicepparamFilePath) ?? "";
+                    var directory = Path.GetDirectoryName(Path.GetFullPath(bicepparamFilePath)) ?? "";
                     var fullPath = Path.GetFullPath(Path.Combine(directory, referencedFile));
                     
-                    // Security: Validate the resolved path doesn't escape the base directory
-                    var baseDirectory = Path.GetFullPath(directory);
-                    var relativePath = Path.GetRelativePath(baseDirectory, fullPath);
-                    if (relativePath.StartsWith("..") || Path.IsPathRooted(relativePath))
+                    // Security check: ensure the resolved path is within the current working directory tree
+                    // This allows relative paths like ../../../deployments/infra.bicep within a repo
+                    // but prevents access to files outside the repo (e.g., /etc/passwd)
+                    var workingDirectory = Path.GetFullPath(Environment.CurrentDirectory);
+                    if (!fullPath.StartsWith(workingDirectory, StringComparison.OrdinalIgnoreCase))
                     {
-                        throw new InvalidOperationException($"Referenced file path '{referencedFile}' resolves outside the base directory.");
+                        throw new UnauthorizedAccessException(
+                            $"Security violation: Referenced file '{referencedFile}' resolves to '{fullPath}' " +
+                            $"which is outside the allowed directory '{workingDirectory}'.");
                     }
+                    
                     if (!File.Exists(fullPath))
                     {
                         throw new FileNotFoundException($"Referenced file '{referencedFile}' does not exist at resolved path '{fullPath}'.");

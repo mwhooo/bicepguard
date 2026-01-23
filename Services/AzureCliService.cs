@@ -168,8 +168,8 @@ public class AzureCliService
                     // If it's a relative path, make it relative to the bicepparam file
                     if (!Path.IsPathRooted(filePath))
                     {
-                        var bicepparamDir = Path.GetDirectoryName(bicepparamFilePath) ?? "";
-                        filePath = Path.Combine(bicepparamDir, filePath);
+                        var bicepparamDir = Path.GetDirectoryName(Path.GetFullPath(bicepparamFilePath)) ?? "";
+                        filePath = Path.GetFullPath(Path.Combine(bicepparamDir, filePath));
                     }
                     
                     return filePath;
@@ -247,7 +247,12 @@ public class AzureCliService
             "Download from: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli");
     }
 
-    public async Task<DeploymentResult> DeployBicepTemplateAsync(string bicepFilePath, string resourceGroup)
+    public async Task<DeploymentResult> DeployBicepTemplateAsync(
+        string bicepFilePath, 
+        DeploymentScope scope,
+        string? resourceGroup,
+        string? subscription,
+        string? location)
     {
         var deploymentName = $"drift-autofix-{DateTime.UtcNow:yyyyMMdd-HHmmss}";
         
@@ -260,12 +265,12 @@ public class AzureCliService
             {
                 // For bicepparam files, we need to get the referenced bicep file and use parameters
                 var referencedBicepFile = await GetReferencedBicepFileAsync(bicepFilePath);
-                arguments = $"deployment group create --resource-group \"{resourceGroup}\" --template-file \"{referencedBicepFile}\" --parameters \"{bicepFilePath}\" --name \"{deploymentName}\" --output json";
+                arguments = BuildDeployArguments(scope, referencedBicepFile, bicepFilePath, deploymentName, resourceGroup, subscription, location);
             }
             else
             {
                 // Regular bicep file
-                arguments = $"deployment group create --resource-group \"{resourceGroup}\" --template-file \"{bicepFilePath}\" --name \"{deploymentName}\" --output json";
+                arguments = BuildDeployArguments(scope, bicepFilePath, null, deploymentName, resourceGroup, subscription, location);
             }
             
             using var process = new Process
@@ -319,6 +324,55 @@ public class AzureCliService
                 DeploymentName = deploymentName,
                 ErrorMessage = ex.Message
             };
+        }
+    }
+
+    /// <summary>
+    /// Backward compatibility overload for resource-group scope.
+    /// </summary>
+    public Task<DeploymentResult> DeployBicepTemplateAsync(string bicepFilePath, string resourceGroup)
+    {
+        return DeployBicepTemplateAsync(bicepFilePath, DeploymentScope.ResourceGroup, resourceGroup, null, null);
+    }
+
+    private static string BuildDeployArguments(
+        DeploymentScope scope,
+        string templateFile,
+        string? parametersFile,
+        string deploymentName,
+        string? resourceGroup,
+        string? subscription,
+        string? location)
+    {
+        var parametersArg = !string.IsNullOrEmpty(parametersFile) 
+            ? $" --parameters \"{parametersFile}\"" 
+            : "";
+
+        if (scope == DeploymentScope.Subscription)
+        {
+            // Defensive check: subscription-scope deployments require a location
+            if (string.IsNullOrWhiteSpace(location))
+            {
+                throw new ArgumentException("Location is required for subscription-scope deployments.", nameof(location));
+            }
+
+            // Subscription-scope deployment: az deployment sub create
+            var subscriptionArg = !string.IsNullOrEmpty(subscription) 
+                ? $" --subscription \"{subscription}\"" 
+                : "";
+            
+            return $"deployment sub create --location \"{location}\"{subscriptionArg} --template-file \"{templateFile}\"{parametersArg} --name \"{deploymentName}\" --output json";
+        }
+        else
+        {
+            // Defensive check: resource-group scope deployments require a resource group
+            if (string.IsNullOrWhiteSpace(resourceGroup))
+            {
+                throw new ArgumentException("Resource group is required for resource-group scope deployments.", nameof(resourceGroup));
+            }
+
+            // Resource-group scope deployment: az deployment group create
+            return $"deployment group create --resource-group \"{resourceGroup}\" --template-file \"{templateFile}\"{parametersArg} --name \"{deploymentName}\" --output json";
         }
     }
 

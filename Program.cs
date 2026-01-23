@@ -19,11 +19,30 @@ class Program
             description: "Path to the Bicep template file (.bicep) or parameters file (.bicepparam)");
         bicepFileOption.IsRequired = true;
 
-        // Resource group option
-        var resourceGroupOption = new Option<string>(
+        // Deployment scope option
+        var scopeOption = new Option<DeploymentScope>(
+            name: "--scope",
+            description: "Deployment scope: ResourceGroup (default) or Subscription");
+        scopeOption.IsRequired = false;
+        scopeOption.SetDefaultValue(DeploymentScope.ResourceGroup);
+
+        // Resource group option (required for ResourceGroup scope)
+        var resourceGroupOption = new Option<string?>(
             name: "--resource-group", 
-            description: "Azure resource group name");
-        resourceGroupOption.IsRequired = true;
+            description: "Azure resource group name (required for ResourceGroup scope)");
+        resourceGroupOption.IsRequired = false;
+
+        // Subscription option (required for Subscription scope)
+        var subscriptionOption = new Option<string?>(
+            name: "--subscription",
+            description: "Azure subscription ID (required for Subscription scope)");
+        subscriptionOption.IsRequired = false;
+
+        // Location option (required for Subscription scope deployments)
+        var locationOption = new Option<string?>(
+            name: "--location",
+            description: "Azure region for deployment (required for Subscription scope)");
+        locationOption.IsRequired = false;
 
         // Output format option
         var outputFormatOption = new Option<OutputFormat>(
@@ -60,15 +79,29 @@ class Program
         showFilteredOption.SetDefaultValue(false);
 
         rootCommand.Add(bicepFileOption);
+        rootCommand.Add(scopeOption);
         rootCommand.Add(resourceGroupOption);
+        rootCommand.Add(subscriptionOption);
+        rootCommand.Add(locationOption);
         rootCommand.Add(outputFormatOption);
         rootCommand.Add(simpleOutputOption);
         rootCommand.Add(autofixOption);
         rootCommand.Add(ignoreConfigOption);
         rootCommand.Add(showFilteredOption);
 
-        rootCommand.SetHandler(async (bicepFile, resourceGroup, outputFormat, simpleOutput, autofix, ignoreConfig, showFiltered) =>
+        rootCommand.SetHandler(async (context) =>
         {
+            var bicepFile = context.ParseResult.GetValueForOption(bicepFileOption)!;
+            var scope = context.ParseResult.GetValueForOption(scopeOption);
+            var resourceGroup = context.ParseResult.GetValueForOption(resourceGroupOption);
+            var subscription = context.ParseResult.GetValueForOption(subscriptionOption);
+            var location = context.ParseResult.GetValueForOption(locationOption);
+            var outputFormat = context.ParseResult.GetValueForOption(outputFormatOption);
+            var simpleOutput = context.ParseResult.GetValueForOption(simpleOutputOption);
+            var autofix = context.ParseResult.GetValueForOption(autofixOption);
+            var ignoreConfig = context.ParseResult.GetValueForOption(ignoreConfigOption);
+            var showFiltered = context.ParseResult.GetValueForOption(showFilteredOption);
+
             try
             {
                 // Set up console encoding and simple output mode
@@ -85,16 +118,44 @@ class Program
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(resourceGroup))
+                // Validate scope-specific requirements
+                if (scope == DeploymentScope.ResourceGroup)
                 {
-                    Console.WriteLine($"{(simpleOutput ? "[ERROR]" : "❌")} Error: Resource group name cannot be empty");
-                    Environment.Exit(1);
-                    return;
+                    if (string.IsNullOrWhiteSpace(resourceGroup))
+                    {
+                        Console.WriteLine($"{(simpleOutput ? "[ERROR]" : "❌")} Error: --resource-group is required for ResourceGroup scope");
+                        Environment.Exit(1);
+                        return;
+                    }
+                }
+                else if (scope == DeploymentScope.Subscription)
+                {
+                    if (string.IsNullOrWhiteSpace(subscription))
+                    {
+                        Console.WriteLine($"{(simpleOutput ? "[ERROR]" : "❌")} Error: --subscription is required for Subscription scope");
+                        Environment.Exit(1);
+                        return;
+                    }
+                    if (string.IsNullOrWhiteSpace(location))
+                    {
+                        Console.WriteLine($"{(simpleOutput ? "[ERROR]" : "❌")} Error: --location is required for Subscription scope");
+                        Environment.Exit(1);
+                        return;
+                    }
                 }
 
-                Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} Azure DriftGuard v4.0.0");
+                Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} Azure DriftGuard v5.0.0");
                 Console.WriteLine($"{(simpleOutput ? "[FILE]" : "📄")} Bicep Template: {bicepFile.Name}");
-                Console.WriteLine($"{(simpleOutput ? "[RG]" : "🏗️")}  Resource Group: {resourceGroup}");
+                Console.WriteLine($"{(simpleOutput ? "[SCOPE]" : "🎯")} Deployment Scope: {scope}");
+                if (scope == DeploymentScope.ResourceGroup)
+                {
+                    Console.WriteLine($"{(simpleOutput ? "[RG]" : "🏗️")}  Resource Group: {resourceGroup}");
+                }
+                else
+                {
+                    Console.WriteLine($"{(simpleOutput ? "[SUB]" : "🔑")} Subscription: {subscription}");
+                    Console.WriteLine($"{(simpleOutput ? "[LOC]" : "🌍")} Location: {location}");
+                }
                 Console.WriteLine($"{(simpleOutput ? "[OUTPUT]" : "📊")} Output Format: {outputFormat}");
                 if (autofix)
                 {
@@ -115,7 +176,13 @@ class Program
                 Environment.SetEnvironmentVariable("SHOW_FILTERED", showFiltered.ToString());
 
                 var detector = new DriftDetector(ignoreConfig?.FullName);
-                var result = await detector.DetectDriftAsync(bicepFile, resourceGroup, outputFormat);
+                var result = await detector.DetectDriftAsync(
+                    bicepFile, 
+                    scope, 
+                    resourceGroup, 
+                    subscription, 
+                    location, 
+                    outputFormat);
                 
                 if (result.HasDrift)
                 {
@@ -124,7 +191,12 @@ class Program
                     if (autofix)
                     {
                         Console.WriteLine($"{(simpleOutput ? "[AUTOFIX]" : "🔧")} Attempting to fix drift by deploying template...");
-                        var deploymentResult = await detector.DeployTemplateAsync(bicepFile, resourceGroup);
+                        var deploymentResult = await detector.DeployTemplateAsync(
+                            bicepFile, 
+                            scope, 
+                            resourceGroup, 
+                            subscription, 
+                            location);
                         
                         if (deploymentResult.Success)
                         {
@@ -165,7 +237,7 @@ class Program
                 Console.WriteLine($"{(simpleOutput ? "[TIP]" : "💡")} Ensure Azure CLI is installed and you're logged in with 'az login'");
                 Environment.Exit(1);
             }
-        }, bicepFileOption, resourceGroupOption, outputFormatOption, simpleOutputOption, autofixOption, ignoreConfigOption, showFilteredOption);
+        });
 
         return await rootCommand.InvokeAsync(args);
     }

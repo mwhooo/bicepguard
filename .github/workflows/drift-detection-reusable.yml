@@ -7,10 +7,21 @@ on:
         description: 'Path to the Bicep template or .bicepparam file'
         required: true
         type: string
-      resource-group:
-        description: 'Azure resource group to check for drift'
-        required: true
+      scope:
+        description: 'Deployment scope: ResourceGroup or Subscription'
+        required: false
         type: string
+        default: 'ResourceGroup'
+      resource-group:
+        description: 'Azure resource group (required for ResourceGroup scope)'
+        required: false
+        type: string
+        default: ''
+      location:
+        description: 'Azure region (required for Subscription scope)'
+        required: false
+        type: string
+        default: 'westeurope'
       environment-name:
         description: 'Environment name (e.g., dev, staging, prod) for reporting'
         required: false
@@ -20,7 +31,7 @@ on:
         description: 'DriftGuard version to use'
         required: false
         type: string
-        default: 'v4.0.0'
+        default: 'v5.0.0'
       autofix:
         description: 'Automatically fix drift by deploying template'
         required: false
@@ -72,11 +83,13 @@ jobs:
       uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
     - name: 📦 Download DriftGuard
+      env:
+        DRIFTGUARD_VERSION: ${{ inputs.driftguard-version }}
       run: |
-        echo "Downloading DriftGuard ${{ inputs.driftguard-version }}..."
-        curl -Lo driftguard.tar.gz "https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/releases/download/${{ inputs.driftguard-version }}/driftguard-linux-x64.tar.gz" || {
+        echo "Downloading DriftGuard ${DRIFTGUARD_VERSION}..."
+        curl -Lo driftguard.tar.gz "https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/releases/download/${DRIFTGUARD_VERSION}/driftguard-linux-x64.tar.gz" || {
           echo "Binary not found, downloading source and building..."
-          curl -Lo driftguard.zip "https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/archive/refs/tags/${{ inputs.driftguard-version }}.zip"
+          curl -Lo driftguard.zip "https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/archive/refs/tags/${DRIFTGUARD_VERSION}.zip"
           unzip -q driftguard.zip
           mv pe-az-driftguard-* driftguard-src
         }
@@ -114,23 +127,55 @@ jobs:
 
     - name: 🔍 Run Drift Detection
       id: drift
+      env:
+        INPUT_SCOPE: ${{ inputs.scope }}
+        INPUT_LOCATION: ${{ inputs.location }}
+        INPUT_RESOURCE_GROUP: ${{ inputs.resource-group }}
+        INPUT_BICEP_FILE: ${{ inputs.bicep-file }}
+        INPUT_IGNORE_CONFIG: ${{ inputs.ignore-config }}
+        INPUT_AUTOFIX: ${{ inputs.autofix }}
+        INPUT_ENVIRONMENT_NAME: ${{ inputs.environment-name }}
+        AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       run: |
         set +e
         
+        # Validate required parameters based on scope
+        if [ "$INPUT_SCOPE" = "ResourceGroup" ] && [ -z "$INPUT_RESOURCE_GROUP" ]; then
+          echo "❌ Error: resource-group is required when scope is ResourceGroup"
+          exit 1
+        fi
+        
+        if [ "$INPUT_SCOPE" = "Subscription" ] && [ -z "$INPUT_LOCATION" ]; then
+          echo "❌ Error: location is required when scope is Subscription"
+          exit 1
+        fi
+        
         IGNORE_CONFIG=""
-        if [ -n "${{ inputs.ignore-config }}" ] && [ -f "${{ inputs.ignore-config }}" ]; then
-          IGNORE_CONFIG="--ignore-config ${{ inputs.ignore-config }}"
+        if [ -n "$INPUT_IGNORE_CONFIG" ] && [ -f "$INPUT_IGNORE_CONFIG" ]; then
+          IGNORE_CONFIG="--ignore-config $INPUT_IGNORE_CONFIG"
         fi
         
         AUTOFIX=""
-        if [ "${{ inputs.autofix }}" = "true" ]; then
+        if [ "$INPUT_AUTOFIX" = "true" ]; then
           AUTOFIX="--autofix"
         fi
         
+        # Build scope-specific arguments using environment variables (safer than direct interpolation)
+        SCOPE_ARGS="--scope $INPUT_SCOPE"
+        if [ "$INPUT_SCOPE" = "Subscription" ]; then
+          SCOPE_ARGS="$SCOPE_ARGS --subscription $AZURE_SUBSCRIPTION_ID --location $INPUT_LOCATION"
+          TARGET_DESC="subscription $AZURE_SUBSCRIPTION_ID"
+        else
+          SCOPE_ARGS="$SCOPE_ARGS --resource-group $INPUT_RESOURCE_GROUP"
+          TARGET_DESC="resource group $INPUT_RESOURCE_GROUP"
+        fi
+        
+        echo "Running drift detection for $TARGET_DESC"
+        
         if [[ "$DRIFTGUARD_PATH" == *.dll ]]; then
           dotnet $DRIFTGUARD_PATH \
-            --bicep-file "${{ inputs.bicep-file }}" \
-            --resource-group "${{ inputs.resource-group }}" \
+            --bicep-file "$INPUT_BICEP_FILE" \
+            $SCOPE_ARGS \
             --output Json \
             --simple-output \
             $IGNORE_CONFIG \
@@ -138,8 +183,8 @@ jobs:
             > drift-report.json 2>&1
         else
           $DRIFTGUARD_PATH \
-            --bicep-file "${{ inputs.bicep-file }}" \
-            --resource-group "${{ inputs.resource-group }}" \
+            --bicep-file "$INPUT_BICEP_FILE" \
+            $SCOPE_ARGS \
             --output Json \
             --simple-output \
             $IGNORE_CONFIG \
@@ -152,12 +197,12 @@ jobs:
         if [ $EXIT_CODE -eq 0 ]; then
           echo "drift_detected=false" >> $GITHUB_OUTPUT
           echo "drift_count=0" >> $GITHUB_OUTPUT
-          echo "✅ No drift detected in ${{ inputs.environment-name }}"
+          echo "✅ No drift detected in $INPUT_ENVIRONMENT_NAME"
         else
           echo "drift_detected=true" >> $GITHUB_OUTPUT
           DRIFT_COUNT=$(cat drift-report.json | grep -o '"ResourcesWithDrift":' | wc -l || echo "1")
           echo "drift_count=$DRIFT_COUNT" >> $GITHUB_OUTPUT
-          echo "❌ Drift detected in ${{ inputs.environment-name }}"
+          echo "❌ Drift detected in $INPUT_ENVIRONMENT_NAME"
         fi
         
         exit 0
@@ -173,17 +218,36 @@ jobs:
     - name: 🐛 Create Issue on Drift
       if: steps.drift.outputs.drift_detected == 'true' && inputs.create-issue == true
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+      env:
+        INPUT_SCOPE: ${{ inputs.scope }}
+        INPUT_LOCATION: ${{ inputs.location }}
+        INPUT_RESOURCE_GROUP: ${{ inputs.resource-group }}
+        INPUT_BICEP_FILE: ${{ inputs.bicep-file }}
+        INPUT_ENVIRONMENT_NAME: ${{ inputs.environment-name }}
+        AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       with:
         script: |
           const fs = require('fs');
           const report = fs.readFileSync('drift-report.json', 'utf8');
           
-          const issueTitle = `🚨 Configuration Drift Detected - ${{ inputs.environment-name }}`;
+          const scope = process.env.INPUT_SCOPE;
+          const location = process.env.INPUT_LOCATION;
+          const resourceGroup = process.env.INPUT_RESOURCE_GROUP;
+          const bicepFile = process.env.INPUT_BICEP_FILE;
+          const environmentName = process.env.INPUT_ENVIRONMENT_NAME;
+          const subscriptionId = process.env.AZURE_SUBSCRIPTION_ID;
+          
+          const targetInfo = scope === 'Subscription' 
+            ? `**Subscription:** ${subscriptionId}\n**Location:** ${location}`
+            : `**Resource Group:** ${resourceGroup}`;
+          
+          const issueTitle = `🚨 Configuration Drift Detected - ${environmentName}`;
           const issueBody = `## Configuration Drift Detected
           
-          **Environment:** ${{ inputs.environment-name }}
-          **Resource Group:** ${{ inputs.resource-group }}
-          **Bicep File:** ${{ inputs.bicep-file }}
+          **Environment:** ${environmentName}
+          **Scope:** ${scope}
+          ${targetInfo}
+          **Bicep File:** ${bicepFile}
           **Detection Time:** ${new Date().toISOString()}
           
           ### Drift Report
@@ -194,7 +258,7 @@ jobs:
           ### Remediation
           Run the following command to fix the drift:
           \`\`\`bash
-          dotnet run -- --bicep-file ${{ inputs.bicep-file }} --resource-group ${{ inputs.resource-group }} --autofix
+          dotnet run -- --bicep-file ${bicepFile} --scope ${scope} ${scope === 'Subscription' ? `--subscription <sub-id> --location ${location}` : `--resource-group ${resourceGroup}`} --autofix
           \`\`\`
           
           Or re-deploy through your CI/CD pipeline.
@@ -205,7 +269,7 @@ jobs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             state: 'open',
-            labels: 'drift-detection,${{ inputs.environment-name }}'
+            labels: `drift-detection,${environmentName}`
           });
           
           if (issues.data.length > 0) {
@@ -223,20 +287,24 @@ jobs:
               repo: context.repo.repo,
               title: issueTitle,
               body: issueBody,
-              labels: ['drift-detection', '${{ inputs.environment-name }}']
+              labels: ['drift-detection', environmentName]
             });
           }
 
     - name: ✅ Close Issue if No Drift
       if: steps.drift.outputs.drift_detected == 'false' && inputs.create-issue == true
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+      env:
+        INPUT_ENVIRONMENT_NAME: ${{ inputs.environment-name }}
       with:
         script: |
+          const environmentName = process.env.INPUT_ENVIRONMENT_NAME;
+          
           const issues = await github.rest.issues.listForRepo({
             owner: context.repo.owner,
             repo: context.repo.repo,
             state: 'open',
-            labels: 'drift-detection,${{ inputs.environment-name }}'
+            labels: `drift-detection,${environmentName}`
           });
           
           for (const issue of issues.data) {
