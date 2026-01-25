@@ -68,45 +68,113 @@ DriftGuard helps maintain **IaC compliance** by identifying these deviations qui
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### 🐳 Docker (Recommended)
+
+**No installation required!** Just pull and run:
+
+```bash
+# Pull the public image (no authentication needed!)
+docker pull mwhooo/driftguard
+
+# Run with your Azure credentials
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup
+```
+
+**Prerequisites:**
+- Docker installed
+- Azure CLI authentication (`az login` on your host machine)
+
+📖 **[Complete Docker Documentation](docs/DOCKER.md)** - Usage patterns, CI/CD examples, and troubleshooting
+
+### 💻 Native Installation
+
+**Prerequisites:**
 - .NET 8.0 SDK
 - Azure CLI (logged in with `az login`)
 - Bicep CLI
 
-### Installation
+**Installation:**
 ```bash
 git clone <your-repo>
 cd DriftGuard
 dotnet build
 ```
 
-### Basic Usage
+### Basic Usage Examples
+
+#### Using Docker
 ```bash
-# Detect drift using a Bicep template (resource-group scope - default)
-dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup
+# Detect drift using a Bicep template (resource-group scope)
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup
 
 # Detect drift using a Bicepparam file
-dotnet run -- --bicep-file template.bicepparam --resource-group myResourceGroup
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicepparam \
+  --resource-group myResourceGroup
 
-# Detect drift for subscription-scope deployments (NEW in v5.0.0!)
-dotnet run -- --bicep-file infra.bicep --scope Subscription --subscription <subscription-id> --location westeurope
+# Detect drift for subscription-scope deployments
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file infra.bicep \
+  --scope Subscription \
+  --subscription <subscription-id> \
+  --location westeurope
 
-# Detect drift and automatically fix it
-dotnet run -- --bicep-file template.bicepparam --resource-group myResourceGroup --autofix
+# Automatically fix detected drift
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicepparam \
+  --resource-group myResourceGroup \
+  --autofix
 
-# Generate HTML report
-dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup --output Html
+# Generate HTML report (saved to your mounted workspace)
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup \
+  --output Html
+```
+
+#### Using Native Binary
+```bash
+# Detect drift using a Bicep template
+dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup
 
 # Generate JSON report for automation
 dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup --output Json
 
 # Use custom ignore configuration to suppress Azure platform noise
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup \
+  --ignore-config custom-ignore.json
+```
+
+**Native Binary Alternative:**
+```bash
 dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup --ignore-config custom-ignore.json
-
-# Works with external Azure Container Registry modules and Azure Verified Modules (AVM)
-dotnet run -- --bicep-file template-with-external-modules.bicep --resource-group myResourceGroup --ignore-config drift-ignore.json
-
-# See docs/DRIFT-IGNORE.md for comprehensive ignore configuration guide
 ```
 
 > 📖 **Need to configure drift ignore rules?** See our comprehensive [Drift Ignore Configuration Guide](docs/DRIFT-IGNORE.md) with examples for common Azure services and best practices.

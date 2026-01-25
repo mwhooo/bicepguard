@@ -1,0 +1,31 @@
+# Git files
+.git/
+.gitignore
+.github/
+
+# Build artifacts
+bin/
+obj/
+release-artifacts/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# IDE files
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Test files
+**/test*/
+**/*Test*/
+
+# Temporary files
+temp/
+*.tmp
+*.log

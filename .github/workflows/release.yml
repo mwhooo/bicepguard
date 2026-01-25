@@ -136,7 +136,7 @@ jobs:
         
         ## 📚 Documentation
         
-        Full documentation available in the [README.md](https://github.com/mwhooo/AzureDriftDetector/blob/main/README.md)
+        Full documentation available in the [README.md](https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/blob/main/README.md)
         
         Built with ❤️ for DevOps teams practicing Infrastructure as Code!
         EOF
@@ -164,4 +164,4 @@ jobs:
         echo "📦 Release artifacts:"
         ls -la release-artifacts/
         echo ""
-        echo "🔗 Release URL: https://github.com/mwhooo/AzureDriftDetector/releases/tag/v${{ steps.version.outputs.version }}"
+        echo "🔗 Release URL: https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/releases/tag/v${{ steps.version.outputs.version }}"
