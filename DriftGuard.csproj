@@ -5,8 +5,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <!-- Version is injected at build time from git tag via -p:Version=x.y.z -->
-    <Version>0.0.0-dev</Version>
     <Product>Azure DriftGuard</Product>
     <Description>Detects configuration drift between Bicep templates and live Azure resources</Description>
   </PropertyGroup>

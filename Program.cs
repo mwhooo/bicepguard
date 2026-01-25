@@ -1,6 +1,7 @@
 using DriftGuard.Core;
 using DriftGuard.Models;
 using System.CommandLine;
+using System.Reflection;
 
 namespace DriftGuard;
 
@@ -144,7 +145,10 @@ class Program
                     }
                 }
 
-                Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} Azure DriftGuard v5.0.0");
+                var version = typeof(Program).Assembly
+                    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                    .InformationalVersion ?? "0.0.0";
+                Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} Azure DriftGuard v{version}");
                 Console.WriteLine($"{(simpleOutput ? "[FILE]" : "📄")} Bicep Template: {bicepFile.Name}");
                 Console.WriteLine($"{(simpleOutput ? "[SCOPE]" : "🎯")} Deployment Scope: {scope}");
                 if (scope == DeploymentScope.ResourceGroup)

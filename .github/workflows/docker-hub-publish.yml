@@ -51,6 +51,7 @@ jobs:
     - name: 🏗️ Build Docker image
       run: |
         docker build \
+          --build-arg VERSION=${{ steps.version.outputs.version }} \
           --tag ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }} \
           --tag ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest \
           --label "org.opencontainers.image.version=${{ steps.version.outputs.version }}" \

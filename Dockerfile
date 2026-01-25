@@ -3,6 +3,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
+# Accept version as build argument
+ARG VERSION=0.0.0-dev
+
 # Copy project files
 COPY ["DriftGuard.csproj", "./"]
 COPY ["Directory.Build.props", "./"]
@@ -13,8 +16,8 @@ RUN dotnet restore "DriftGuard.csproj"
 # Copy source code
 COPY . .
 
-# Build and publish
-RUN dotnet publish "DriftGuard.csproj" -c Release -o /app/publish --no-restore
+# Build and publish with version
+RUN dotnet publish "DriftGuard.csproj" -c Release -o /app/publish --no-restore -p:Version=${VERSION}
 
 # Stage 2: Runtime image with Azure CLI and Bicep
 FROM mcr.microsoft.com/azure-cli:latest
