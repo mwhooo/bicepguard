@@ -496,10 +496,29 @@ public class WhatIfJsonService
         }
 
         // Resource ID format: /subscriptions/{sub}/resourceGroups/{rg}/providers/{provider}/{type}/{name}
+        // Or for resource groups: /subscriptions/{sub}/resourceGroups/{rgName}
         var parts = resourceId.Split('/');
         
         // Find the providers index
         var providersIndex = Array.IndexOf(parts, "providers");
+        var resourceGroupsIndex = Array.IndexOf(parts, "resourceGroups");
+        
+        // If we have resourceGroups but no providers, this IS a resource group resource
+        if (resourceGroupsIndex >= 0 && providersIndex < 0)
+        {
+            // Format: /subscriptions/{sub}/resourceGroups/{rgName}
+            if (resourceGroupsIndex + 1 < parts.Length)
+            {
+                var rgName = parts[resourceGroupsIndex + 1];
+                if (string.IsNullOrWhiteSpace(rgName))
+                {
+                    return ("Microsoft.Resources/resourceGroups", "Unknown");
+                }
+                return ("Microsoft.Resources/resourceGroups", rgName);
+            }
+            return ("Microsoft.Resources/resourceGroups", "Unknown");
+        }
+        
         if (providersIndex < 0 || providersIndex + 3 > parts.Length)
         {
             return ("Unknown", resourceId);
