@@ -23,7 +23,8 @@ public class WhatIfJsonService
     /// Supports both resource-group and subscription scope deployments.
     /// </summary>
     public async Task<DriftDetectionResult> RunWhatIfAsync(
-        string bicepFilePath, 
+        string bicepFilePath,
+        string? parametersFilePath,
         DeploymentScope scope,
         string? resourceGroup,
         string? subscription,
@@ -40,6 +41,12 @@ public class WhatIfJsonService
                 var referencedBicepFile = await GetReferencedBicepFileAsync(bicepFilePath);
                 templateFile = referencedBicepFile;
                 argumentsString = BuildWhatIfArguments(scope, referencedBicepFile, bicepFilePath, resourceGroup, subscription, location);
+            }
+            else if (!string.IsNullOrEmpty(parametersFilePath))
+            {
+                // Using separate parameters file (JSON)
+                templateFile = bicepFilePath;
+                argumentsString = BuildWhatIfArguments(scope, bicepFilePath, parametersFilePath, resourceGroup, subscription, location);
             }
             else
             {
@@ -108,7 +115,7 @@ public class WhatIfJsonService
     /// </summary>
     public Task<DriftDetectionResult> RunWhatIfAsync(string bicepFilePath, string resourceGroup)
     {
-        return RunWhatIfAsync(bicepFilePath, DeploymentScope.ResourceGroup, resourceGroup, null, null);
+        return RunWhatIfAsync(bicepFilePath, null, DeploymentScope.ResourceGroup, resourceGroup, null, null);
     }
 
     /// <summary>

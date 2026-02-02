@@ -20,6 +20,12 @@ class Program
             description: "Path to the Bicep template file (.bicep) or parameters file (.bicepparam)");
         bicepFileOption.IsRequired = true;
 
+        // Parameters file option (for JSON parameter files)
+        var parametersFileOption = new Option<FileInfo?>(
+            aliases: new[] { "--parameters-file", "-p" },
+            description: "Path to ARM JSON parameters file (.json) to use with the Bicep template");
+        parametersFileOption.IsRequired = false;
+
         // Deployment scope option
         var scopeOption = new Option<DeploymentScope>(
             name: "--scope",
@@ -80,6 +86,7 @@ class Program
         showFilteredOption.SetDefaultValue(false);
 
         rootCommand.Add(bicepFileOption);
+        rootCommand.Add(parametersFileOption);
         rootCommand.Add(scopeOption);
         rootCommand.Add(resourceGroupOption);
         rootCommand.Add(subscriptionOption);
@@ -93,6 +100,7 @@ class Program
         rootCommand.SetHandler(async (context) =>
         {
             var bicepFile = context.ParseResult.GetValueForOption(bicepFileOption)!;
+            var parametersFile = context.ParseResult.GetValueForOption(parametersFileOption);
             var scope = context.ParseResult.GetValueForOption(scopeOption);
             var resourceGroup = context.ParseResult.GetValueForOption(resourceGroupOption);
             var subscription = context.ParseResult.GetValueForOption(subscriptionOption);
@@ -117,6 +125,35 @@ class Program
                     Console.WriteLine($"{(simpleOutput ? "[ERROR]" : "❌")} Error: Bicep file not found: {bicepFile.FullName}");
                     Environment.Exit(1);
                     return;
+                }
+
+                // Prevent conflicting parameter configurations:
+                // a .bicepparam file provided via --bicep-file cannot be combined with --parameters-file
+                if (parametersFile != null &&
+                    bicepFile != null &&
+                    string.Equals(bicepFile.Extension, ".bicepparam", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine($"{(simpleOutput ? "[ERROR]" : "❌")} Error: Cannot use a .bicepparam file via --bicep-file together with --parameters-file. Please specify only one source of parameters.");
+                    Environment.Exit(1);
+                    return;
+                }
+
+                // Validate parameters file if provided
+                if (parametersFile != null)
+                {
+                    if (!parametersFile.Exists)
+                    {
+                        Console.WriteLine($"{(simpleOutput ? "[ERROR]" : "❌")} Error: Parameters file not found: {parametersFile.FullName}");
+                        Environment.Exit(1);
+                        return;
+                    }
+
+                    if (!parametersFile.Extension.Equals(".json", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.WriteLine($"{(simpleOutput ? "[ERROR]" : "❌")} Error: Parameters file must have a .json extension: {parametersFile.FullName}");
+                        Environment.Exit(1);
+                        return;
+                    }
                 }
 
                 // Validate scope-specific requirements
@@ -150,6 +187,10 @@ class Program
                     .InformationalVersion ?? "0.0.0";
                 Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} Azure DriftGuard v{version}");
                 Console.WriteLine($"{(simpleOutput ? "[FILE]" : "📄")} Bicep Template: {bicepFile.Name}");
+                if (parametersFile != null)
+                {
+                    Console.WriteLine($"{(simpleOutput ? "[PARAMS]" : "📋")} Parameters File: {parametersFile.Name}");
+                }
                 Console.WriteLine($"{(simpleOutput ? "[SCOPE]" : "🎯")} Deployment Scope: {scope}");
                 if (scope == DeploymentScope.ResourceGroup)
                 {
@@ -181,7 +222,8 @@ class Program
 
                 var detector = new DriftDetector(ignoreConfig?.FullName);
                 var result = await detector.DetectDriftAsync(
-                    bicepFile, 
+                    bicepFile,
+                    parametersFile,
                     scope, 
                     resourceGroup, 
                     subscription, 
@@ -196,7 +238,8 @@ class Program
                     {
                         Console.WriteLine($"{(simpleOutput ? "[AUTOFIX]" : "🔧")} Attempting to fix drift by deploying template...");
                         var deploymentResult = await detector.DeployTemplateAsync(
-                            bicepFile, 
+                            bicepFile,
+                            parametersFile,
                             scope, 
                             resourceGroup, 
                             subscription, 

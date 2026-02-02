@@ -23,7 +23,8 @@ public class DriftDetector
     }
 
     public async Task<DriftDetectionResult> DetectDriftAsync(
-        FileInfo bicepFile, 
+        FileInfo bicepFile,
+        FileInfo? parametersFile,
         DeploymentScope scope,
         string? resourceGroup,
         string? subscription,
@@ -36,12 +37,17 @@ public class DriftDetector
         
         Console.WriteLine($"🔍 Starting drift detection for {targetDescription}");
         Console.WriteLine($"📄 Using Bicep template: {bicepFile.FullName}");
+        if (parametersFile != null)
+        {
+            Console.WriteLine($"📋 Using parameters file: {parametersFile.FullName}");
+        }
 
         try
         {
             // Use the new JSON-based what-if service for more reliable drift detection
             var result = await _whatIfJsonService.RunWhatIfAsync(
-                bicepFile.FullName, 
+                bicepFile.FullName,
+                parametersFile?.FullName,
                 scope, 
                 resourceGroup, 
                 subscription, 
@@ -71,11 +77,12 @@ public class DriftDetector
         string resourceGroup, 
         OutputFormat outputFormat = OutputFormat.Console)
     {
-        return DetectDriftAsync(bicepFile, DeploymentScope.ResourceGroup, resourceGroup, null, null, outputFormat);
+        return DetectDriftAsync(bicepFile, null, DeploymentScope.ResourceGroup, resourceGroup, null, null, outputFormat);
     }
 
     public async Task<DeploymentResult> DeployTemplateAsync(
-        FileInfo bicepFile, 
+        FileInfo bicepFile,
+        FileInfo? parametersFile,
         DeploymentScope scope,
         string? resourceGroup,
         string? subscription,
@@ -91,9 +98,14 @@ public class DriftDetector
         {
             Console.WriteLine($"{(simpleOutput ? "[DEPLOY]" : "🚀")} Deploying Bicep template to {targetDescription}");
             Console.WriteLine($"{(simpleOutput ? "[FILE]" : "📄")} Template file: {bicepFile.FullName}");
+            if (parametersFile != null)
+            {
+                Console.WriteLine($"{(simpleOutput ? "[PARAMS]" : "📋")} Parameters file: {parametersFile.FullName}");
+            }
 
             var result = await _azureCliService.DeployBicepTemplateAsync(
-                bicepFile.FullName, 
+                bicepFile.FullName,
+                parametersFile?.FullName,
                 scope, 
                 resourceGroup, 
                 subscription, 
@@ -152,6 +164,6 @@ public class DriftDetector
     // Backward compatibility overload for resource-group scope
     public Task<DeploymentResult> DeployTemplateAsync(FileInfo bicepFile, string resourceGroup)
     {
-        return DeployTemplateAsync(bicepFile, DeploymentScope.ResourceGroup, resourceGroup, null, null);
+        return DeployTemplateAsync(bicepFile, null, DeploymentScope.ResourceGroup, resourceGroup, null, null);
     }
 }

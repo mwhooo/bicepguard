@@ -248,7 +248,8 @@ public class AzureCliService
     }
 
     public async Task<DeploymentResult> DeployBicepTemplateAsync(
-        string bicepFilePath, 
+        string bicepFilePath,
+        string? parametersFilePath,
         DeploymentScope scope,
         string? resourceGroup,
         string? subscription,
@@ -267,9 +268,14 @@ public class AzureCliService
                 var referencedBicepFile = await GetReferencedBicepFileAsync(bicepFilePath);
                 arguments = BuildDeployArguments(scope, referencedBicepFile, bicepFilePath, deploymentName, resourceGroup, subscription, location);
             }
+            else if (!string.IsNullOrEmpty(parametersFilePath))
+            {
+                // Using separate parameters file (JSON)
+                arguments = BuildDeployArguments(scope, bicepFilePath, parametersFilePath, deploymentName, resourceGroup, subscription, location);
+            }
             else
             {
-                // Regular bicep file
+                // Regular bicep file without parameters
                 arguments = BuildDeployArguments(scope, bicepFilePath, null, deploymentName, resourceGroup, subscription, location);
             }
             
@@ -332,7 +338,7 @@ public class AzureCliService
     /// </summary>
     public Task<DeploymentResult> DeployBicepTemplateAsync(string bicepFilePath, string resourceGroup)
     {
-        return DeployBicepTemplateAsync(bicepFilePath, DeploymentScope.ResourceGroup, resourceGroup, null, null);
+        return DeployBicepTemplateAsync(bicepFilePath, null, DeploymentScope.ResourceGroup, resourceGroup, null, null);
     }
 
     private static string BuildDeployArguments(
