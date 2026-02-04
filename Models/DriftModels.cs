@@ -8,6 +8,12 @@ public enum OutputFormat
     Markdown
 }
 
+public enum DeploymentScope
+{
+    ResourceGroup,
+    Subscription
+}
+
 public class DriftDetectionResult
 {
     public bool HasDrift { get; set; }

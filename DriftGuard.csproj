@@ -5,9 +5,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>4.0.1</Version>
-    <AssemblyVersion>4.0.1.0</AssemblyVersion>
-    <FileVersion>4.0.1.0</FileVersion>
     <Product>Azure DriftGuard</Product>
     <Description>Detects configuration drift between Bicep templates and live Azure resources</Description>
   </PropertyGroup>

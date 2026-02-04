@@ -1,0 +1,98 @@
+name: 🐳 Build and Push to Docker Hub
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on version tags
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., 5.1.0)'
+        required: true
+      push_to_registry:
+        description: 'Push to Docker Hub'
+        required: true
+        default: true
+        type: boolean
+
+env:
+  DOCKERHUB_USERNAME: mwhooo
+  IMAGE_NAME: driftguard
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    name: 🏗️ Build and Push Docker Image
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      
+    - name: 📋 Extract version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION=${GITHUB_REF#refs/tags/v}
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+        
+    - name: 🔑 Login to Docker Hub
+      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+      with:
+        username: ${{ env.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+    - name: 🏗️ Build Docker image
+      run: |
+        docker build \
+          --build-arg VERSION=${{ steps.version.outputs.version }} \
+          --tag ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }} \
+          --tag ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest \
+          --label "org.opencontainers.image.version=${{ steps.version.outputs.version }}" \
+          --label "org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+          --label "org.opencontainers.image.revision=${{ github.sha }}" \
+          --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
+          --label "org.opencontainers.image.title=DriftGuard" \
+          --label "org.opencontainers.image.description=Azure infrastructure drift detection and remediation tool" \
+          .
+          
+    - name: 🧪 Test Docker image
+      run: |
+        echo "Testing Docker image..."
+        docker run --rm ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }} --help
+        
+    - name: 📤 Push to Docker Hub
+      if: github.event.inputs.push_to_registry != 'false'
+      run: |
+        docker push ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+        docker push ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+        
+    - name: 📊 Summary
+      run: |
+        echo "### 🎉 Docker Image Published to Docker Hub!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Image:** \`${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Version:** \`${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Docker Hub:** https://hub.docker.com/r/${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "#### Pull commands:" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+        echo "# Pull specific version" >> $GITHUB_STEP_SUMMARY
+        echo "docker pull ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "# Pull latest" >> $GITHUB_STEP_SUMMARY
+        echo "docker pull ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "#### Run commands:" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+        echo "docker run --rm -v ~/.azure:/root/.azure -v \$(pwd):/workspace \\" >> $GITHUB_STEP_SUMMARY
+        echo "  ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }} \\" >> $GITHUB_STEP_SUMMARY
+        echo "  --bicep-file template.bicep --resource-group myResourceGroup" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

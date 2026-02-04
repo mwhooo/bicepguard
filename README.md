@@ -2,6 +2,8 @@
 
 A sophisticated C# console application that detects configuration drift between Bicep/ARM templates and live Azure resources. Built for DevOps teams practicing Infrastructure as Code (IaC) to ensure deployed resources match their intended configuration.
 
+> 🔗 **Want to add drift detection to your Azure repos?** See our [Integration Guide](docs/INTEGRATION.md) for quick setup using reusable workflows.
+
 ## 🎯 Purpose
 
 Configuration drift occurs when live Azure resources diverge from their Infrastructure as Code definitions. This can happen through:
@@ -16,7 +18,8 @@ DriftGuard helps maintain **IaC compliance** by identifying these deviations qui
 ## ✨ Key Features
 
 ### 🔍 **Azure What-If Based Drift Detection**
-- **Azure-Native Comparison**: Uses Azure's `az deployment group what-if` for authoritative drift detection
+- **Azure-Native Comparison**: Uses Azure's `az deployment what-if` for authoritative drift detection
+- **Multi-Scope Support**: Works with both resource-group scope (`az deployment group`) and subscription scope (`az deployment sub`)
 - **Intelligent Noise Suppression**: Filters Azure platform behaviors with configurable ignore patterns
 - **Multi-Resource Support**: Works with any Azure resource type (VNets, Storage, Key Vault, App Services, NSGs, etc.)
 - **Property-Level Comparison**: Detects specific property changes with precise Expected vs Actual reporting
@@ -65,42 +68,113 @@ DriftGuard helps maintain **IaC compliance** by identifying these deviations qui
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### 🐳 Docker (Recommended)
+
+**No installation required!** Just pull and run:
+
+```bash
+# Pull the public image (no authentication needed!)
+docker pull mwhooo/driftguard
+
+# Run with your Azure credentials
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup
+```
+
+**Prerequisites:**
+- Docker installed
+- Azure CLI authentication (`az login` on your host machine)
+
+📖 **[Complete Docker Documentation](docs/DOCKER.md)** - Usage patterns, CI/CD examples, and troubleshooting
+
+### 💻 Native Installation
+
+**Prerequisites:**
 - .NET 8.0 SDK
 - Azure CLI (logged in with `az login`)
 - Bicep CLI
 
-### Installation
+**Installation:**
 ```bash
 git clone <your-repo>
 cd DriftGuard
 dotnet build
 ```
 
-### Basic Usage
+### Basic Usage Examples
+
+#### Using Docker
+```bash
+# Detect drift using a Bicep template (resource-group scope)
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup
+
+# Detect drift using a Bicepparam file
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicepparam \
+  --resource-group myResourceGroup
+
+# Detect drift for subscription-scope deployments
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file infra.bicep \
+  --scope Subscription \
+  --subscription <subscription-id> \
+  --location westeurope
+
+# Automatically fix detected drift
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicepparam \
+  --resource-group myResourceGroup \
+  --autofix
+
+# Generate HTML report (saved to your mounted workspace)
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup \
+  --output Html
+```
+
+#### Using Native Binary
 ```bash
 # Detect drift using a Bicep template
 dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup
-
-# Detect drift using a Bicepparam file
-dotnet run -- --bicep-file template.bicepparam --resource-group myResourceGroup
-
-# Detect drift and automatically fix it
-dotnet run -- --bicep-file template.bicepparam --resource-group myResourceGroup --autofix
-
-# Generate HTML report
-dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup --output Html
 
 # Generate JSON report for automation
 dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup --output Json
 
 # Use custom ignore configuration to suppress Azure platform noise
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup \
+  --ignore-config custom-ignore.json
+```
+
+**Native Binary Alternative:**
+```bash
 dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup --ignore-config custom-ignore.json
-
-# Works with external Azure Container Registry modules and Azure Verified Modules (AVM)
-dotnet run -- --bicep-file template-with-external-modules.bicep --resource-group myResourceGroup --ignore-config drift-ignore.json
-
-# See docs/DRIFT-IGNORE.md for comprehensive ignore configuration guide
 ```
 
 > 📖 **Need to configure drift ignore rules?** See our comprehensive [Drift Ignore Configuration Guide](docs/DRIFT-IGNORE.md) with examples for common Azure services and best practices.

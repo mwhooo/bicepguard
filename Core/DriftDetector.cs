@@ -23,17 +23,35 @@ public class DriftDetector
     }
 
     public async Task<DriftDetectionResult> DetectDriftAsync(
-        FileInfo bicepFile, 
-        string resourceGroup, 
+        FileInfo bicepFile,
+        FileInfo? parametersFile,
+        DeploymentScope scope,
+        string? resourceGroup,
+        string? subscription,
+        string? location,
         OutputFormat outputFormat = OutputFormat.Console)
     {
-        Console.WriteLine($"🔍 Starting drift detection for resource group: {resourceGroup}");
+        var targetDescription = scope == DeploymentScope.ResourceGroup 
+            ? $"resource group: {resourceGroup}" 
+            : $"subscription: {subscription}";
+        
+        Console.WriteLine($"🔍 Starting drift detection for {targetDescription}");
         Console.WriteLine($"📄 Using Bicep template: {bicepFile.FullName}");
+        if (parametersFile != null)
+        {
+            Console.WriteLine($"📋 Using parameters file: {parametersFile.FullName}");
+        }
 
         try
         {
             // Use the new JSON-based what-if service for more reliable drift detection
-            var result = await _whatIfJsonService.RunWhatIfAsync(bicepFile.FullName, resourceGroup);
+            var result = await _whatIfJsonService.RunWhatIfAsync(
+                bicepFile.FullName,
+                parametersFile?.FullName,
+                scope, 
+                resourceGroup, 
+                subscription, 
+                location);
 
             // Generate report
             Console.WriteLine("📊 Generating drift report...");
@@ -53,16 +71,45 @@ public class DriftDetector
         }
     }
 
-    public async Task<DeploymentResult> DeployTemplateAsync(FileInfo bicepFile, string resourceGroup)
+    // Backward compatibility overload for resource-group scope
+    public Task<DriftDetectionResult> DetectDriftAsync(
+        FileInfo bicepFile, 
+        string resourceGroup, 
+        OutputFormat outputFormat = OutputFormat.Console)
+    {
+        return DetectDriftAsync(bicepFile, null, DeploymentScope.ResourceGroup, resourceGroup, null, null, outputFormat);
+    }
+
+    public async Task<DeploymentResult> DeployTemplateAsync(
+        FileInfo bicepFile,
+        FileInfo? parametersFile,
+        DeploymentScope scope,
+        string? resourceGroup,
+        string? subscription,
+        string? location)
     {
         bool simpleOutput = Environment.GetEnvironmentVariable("SIMPLE_OUTPUT") == "True";
         
+        var targetDescription = scope == DeploymentScope.ResourceGroup 
+            ? $"resource group: {resourceGroup}" 
+            : $"subscription: {subscription}";
+        
         try
         {
-            Console.WriteLine($"{(simpleOutput ? "[DEPLOY]" : "🚀")} Deploying Bicep template to resource group: {resourceGroup}");
+            Console.WriteLine($"{(simpleOutput ? "[DEPLOY]" : "🚀")} Deploying Bicep template to {targetDescription}");
             Console.WriteLine($"{(simpleOutput ? "[FILE]" : "📄")} Template file: {bicepFile.FullName}");
+            if (parametersFile != null)
+            {
+                Console.WriteLine($"{(simpleOutput ? "[PARAMS]" : "📋")} Parameters file: {parametersFile.FullName}");
+            }
 
-            var result = await _azureCliService.DeployBicepTemplateAsync(bicepFile.FullName, resourceGroup);
+            var result = await _azureCliService.DeployBicepTemplateAsync(
+                bicepFile.FullName,
+                parametersFile?.FullName,
+                scope, 
+                resourceGroup, 
+                subscription, 
+                location);
             
             if (result.Success)
             {
@@ -112,5 +159,11 @@ public class DriftDetector
                 ErrorMessage = $"Unexpected error: {ex.Message}"
             };
         }
+    }
+
+    // Backward compatibility overload for resource-group scope
+    public Task<DeploymentResult> DeployTemplateAsync(FileInfo bicepFile, string resourceGroup)
+    {
+        return DeployTemplateAsync(bicepFile, null, DeploymentScope.ResourceGroup, resourceGroup, null, null);
     }
 }

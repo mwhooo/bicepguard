@@ -1,20 +1,21 @@
-name: 🔍 Azure Drift Monitoring
+name: 🔍 Azure Drift Monitoring (Example)
+
+# This workflow is disabled in this repository but will work automatically when
+# copied to your infrastructure repository. Simply copy this file and update the
+# configuration below with your Azure resource details.
+#
+# The workflow is already configured to run on manual trigger (workflow_dispatch).
+# To enable automatic scheduled runs:
+# 1. Add a schedule trigger:
+#    on:
+#      schedule:
+#        - cron: '0 */6 * * *'  # Every 6 hours
+#      workflow_dispatch:
+# 2. Update the matrix below with your resource groups and templates
+# 3. Ensure Azure OIDC authentication is configured (see docs/OIDC-SETUP.md)
 
 on:
-  schedule:
-    # Run every 6 hours
-    - cron: '0 */6 * * *'
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to check'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-        - dev
-        - staging
-        - prod
 
 permissions:
   contents: read
@@ -23,20 +24,22 @@ permissions:
 
 jobs:
   monitor-drift:
+    # This job will only run when copied to a different repository
+    if: github.repository != 'NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        environment: 
-          - { name: 'dev', resource_group: 'dev', template: 'samples/main-template.bicepparam' }
+        environment:
+          - { name: 'dev', resource_group: 'YOUR_RESOURCE_GROUP', template: 'path/to/your-template.bicepparam' }
       fail-fast: false
       
     name: Monitor ${{ matrix.environment.name }}
     
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: '8.0.x'
     
@@ -47,7 +50,7 @@ jobs:
         sudo mv ./bicep /usr/local/bin/bicep
       
     - name: Azure Login
-      uses: azure/login@v2
+      uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -72,7 +75,7 @@ jobs:
 
     - name: Create Issue on Drift
       if: steps.check.outputs.drift == 'true'
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         script: |
           const { createDriftIssue } = require('./.github/scripts/create-drift-issue.js');
