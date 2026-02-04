@@ -1,0 +1,23 @@
+# Example Terraform variables file for IaC benchmark
+# Copy this file to terraform.tfvars and update values
+
+resource_group_name = "driftguard-benchmark-rg"
+location            = "westeurope"
+environment_name    = "benchmark"
+application_name    = "drifttest"
+
+tags = {
+  Environment  = "benchmark"
+  Application  = "drifttest"
+  ResourceType = "Infrastructure"
+  IaC          = "Terraform"
+}
+
+# Deployment flags - set to true to deploy
+deploy_vnet             = true
+deploy_nsg              = true
+deploy_storage          = true
+deploy_app_service_plan = true
+deploy_log_analytics    = true
+deploy_key_vault        = false
+deploy_service_bus      = false

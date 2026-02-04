@@ -29,7 +29,7 @@ jobs:
     
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0 # Fetch full history for changelog
         
@@ -63,25 +63,27 @@ jobs:
       run: dotnet restore DriftGuard.csproj
       
     - name: 🏗️ Build release artifacts
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
       run: |
         # Create output directory
         mkdir -p release-artifacts
         
-        # Build for Windows x64
-        dotnet publish DriftGuard.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./temp/win-x64
-        zip -r release-artifacts/DriftGuard-${{ steps.version.outputs.version }}-win-x64.zip ./temp/win-x64/
+        # Build for Windows x64 (inject version from git tag)
+        dotnet publish DriftGuard.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$VERSION -o ./temp/win-x64
+        zip -r release-artifacts/DriftGuard-${VERSION}-win-x64.zip ./temp/win-x64/
         
         # Build for Linux x64  
-        dotnet publish DriftGuard.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o ./temp/linux-x64
-        tar -czf release-artifacts/DriftGuard-${{ steps.version.outputs.version }}-linux-x64.tar.gz -C ./temp/linux-x64 .
+        dotnet publish DriftGuard.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$VERSION -o ./temp/linux-x64
+        tar -czf release-artifacts/DriftGuard-${VERSION}-linux-x64.tar.gz -C ./temp/linux-x64 .
         
         # Build for macOS x64
-        dotnet publish DriftGuard.csproj -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true -o ./temp/osx-x64
-        zip -r release-artifacts/DriftGuard-${{ steps.version.outputs.version }}-osx-x64.zip ./temp/osx-x64/
+        dotnet publish DriftGuard.csproj -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$VERSION -o ./temp/osx-x64
+        zip -r release-artifacts/DriftGuard-${VERSION}-osx-x64.zip ./temp/osx-x64/
         
         # Create portable .NET version (requires .NET runtime)
-        dotnet publish DriftGuard.csproj -c Release --no-self-contained -o ./temp/portable
-        zip -r release-artifacts/DriftGuard-${{ steps.version.outputs.version }}-portable.zip ./temp/portable/
+        dotnet publish DriftGuard.csproj -c Release --no-self-contained -p:Version=$VERSION -o ./temp/portable
+        zip -r release-artifacts/DriftGuard-${VERSION}-portable.zip ./temp/portable/
         
     - name: 📋 Generate release notes
       id: changelog
@@ -134,7 +136,7 @@ jobs:
         
         ## 📚 Documentation
         
-        Full documentation available in the [README.md](https://github.com/mwhooo/AzureDriftDetector/blob/main/README.md)
+        Full documentation available in the [README.md](https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/blob/main/README.md)
         
         Built with ❤️ for DevOps teams practicing Infrastructure as Code!
         EOF
@@ -145,7 +147,7 @@ jobs:
         echo "EOF" >> $GITHUB_OUTPUT
         
     - name: 🚀 Create GitHub Release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
       with:
         name: DriftGuard v${{ steps.version.outputs.version }}
         body: ${{ steps.changelog.outputs.release_notes }}
@@ -162,4 +164,4 @@ jobs:
         echo "📦 Release artifacts:"
         ls -la release-artifacts/
         echo ""
-        echo "🔗 Release URL: https://github.com/mwhooo/AzureDriftDetector/releases/tag/v${{ steps.version.outputs.version }}"
+        echo "🔗 Release URL: https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/releases/tag/v${{ steps.version.outputs.version }}"
