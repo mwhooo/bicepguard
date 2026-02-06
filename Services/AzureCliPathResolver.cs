@@ -16,17 +16,10 @@ public static class AzureCliPathResolver
     /// <exception cref="InvalidOperationException">Thrown when Azure CLI cannot be found.</exception>
     public static string GetAzureCLIPath()
     {
-        // On Linux/Docker, try common Linux paths first
+        // On Linux/Docker, just use 'az' from PATH
         if (Environment.OSVersion.Platform == PlatformID.Unix)
         {
-            var linuxPaths = new[] { "/usr/bin/az", "/usr/local/bin/az", "az" };
-            foreach (var path in linuxPaths)
-            {
-                if (IsCommandAvailable(path))
-                {
-                    return path;
-                }
-            }
+            return "az";
         }
 
         // On Windows, try to find az using 'where' command (most reliable)
@@ -110,11 +103,20 @@ public static class AzureCliPathResolver
             };
 
             process.Start();
-            process.WaitForExit(AzCliVersionCheckTimeoutMs);
+            
+            // Wait for exit with timeout - returns false if timeout expires
+            if (!process.WaitForExit(AzCliVersionCheckTimeoutMs))
+            {
+                // Process didn't exit in time, kill it
+                try { process.Kill(); } catch {  }
+                return false;
+            }
+            
             return process.ExitCode == 0;
         }
         catch
         {
+            // Command not found or other error
             return false;
         }
     }
