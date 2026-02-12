@@ -8,7 +8,7 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "06:00"
-      timezone: "UTC"
+      timezone: "Etc/UTC"
     open-pull-requests-limit: 10
     reviewers:
       - "mwhooo"
@@ -28,7 +28,7 @@ updates:
       interval: "weekly"
       day: "monday" 
       time: "06:00"
-      timezone: "UTC"
+      timezone: "Etc/UTC"
     open-pull-requests-limit: 5
     reviewers:
       - "mwhooo"
