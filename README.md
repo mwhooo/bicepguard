@@ -26,13 +26,6 @@ DriftGuard helps maintain **IaC compliance** by identifying these deviations qui
 - **Complex Object Handling**: Intelligent reporting for arrays and nested objects
 - **External Module Support**: Full support for Azure Container Registry modules (`br:` syntax) and Azure Verified Modules (AVM)
 
-### 🎨 **Type-Safe Bicep with User-Defined Types (UDTs)**
-- **Exported Types**: Each Bicep module exports its own configuration types with `@export()`
-- **Single Config Objects**: Clean module interface with one config parameter per module
-- **Full IntelliSense**: Complete type checking and autocomplete in VS Code
-- **DRY Architecture**: Types defined once in modules, imported where needed
-- **Compile-Time Validation**: Catch configuration errors before deployment
-
 ### 📊 **Clean, Human-Friendly Reporting**
 - **Suppressed Verbose Output**: Azure what-if output hidden, showing only formatted results
 - **Console**: Clean, colorized terminal output with emojis
@@ -46,13 +39,6 @@ DriftGuard helps maintain **IaC compliance** by identifying these deviations qui
 - **Smart Deployment**: Only deploys when actual drift is detected
 - **Safe Execution**: Provides detailed deployment feedback and error handling
 - **Deployment Tracking**: Generates unique deployment names with timestamps
-
-### 🎛️ **Modern Bicep Architecture**
-- **Modular Design**: Separate modules for each resource type in `bicep-modules/` directory
-- **Bicepparam Support**: Native `.bicepparam` file support for parameter management
-- **Union Types**: Type-safe SKU and configuration options using union types
-- **Optional Parameters**: Nullable fields with safe access operators and sensible defaults
-- **Parameter Merging**: Automatic merging of common parameters (location, tags) with config objects
 
 ### 🔇 **Intelligent Drift Filtering**
 - **Noise Suppression**: Advanced ignore system to filter out Azure platform behaviors and false positives
