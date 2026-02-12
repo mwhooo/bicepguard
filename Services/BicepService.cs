@@ -401,7 +401,7 @@ public class BicepService
                     if (!Path.IsPathRooted(filePath))
                     {
                         var bicepparamDir = Path.GetDirectoryName(bicepparamFilePath) ?? "";
-                        filePath = Path.Combine(bicepparamDir, filePath);
+                        filePath = Path.GetFullPath(Path.Combine(bicepparamDir, filePath));
                     }
                     
                     return filePath;

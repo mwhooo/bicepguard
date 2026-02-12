@@ -54,9 +54,9 @@ public static class AzureCliPathResolver
                 }
             }
         }
-        catch
+        catch (Exception)
         {
-            // Fall back to manual search
+            // Fall back to manual search if 'where' command fails or times out
         }
 
         // Try common Windows Azure CLI locations
@@ -108,13 +108,13 @@ public static class AzureCliPathResolver
             if (!process.WaitForExit(AzCliVersionCheckTimeoutMs))
             {
                 // Process didn't exit in time, kill it
-                try { process.Kill(); } catch {  }
+                try { process.Kill(); } catch (Exception) { /* Best-effort cleanup: process may have already exited or be terminating */ }
                 return false;
             }
             
             return process.ExitCode == 0;
         }
-        catch
+        catch (Exception)
         {
             // Command not found or other error
             return false;
