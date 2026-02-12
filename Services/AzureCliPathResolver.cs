@@ -27,15 +27,15 @@ public static class AzureCliPathResolver
         {
             using var whereProcess = new Process
             {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "where.exe",
-                    Arguments = "az",
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                }
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "where.exe",
+                Arguments = "az",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            }
             };
             
             whereProcess.Start();
@@ -44,19 +44,23 @@ public static class AzureCliPathResolver
             
             if (whereProcess.ExitCode == 0 && !string.IsNullOrWhiteSpace(output))
             {
-                var paths = output.Trim().Split('\n', '\r');
-                // Prefer .cmd files over batch files, filter out empty lines
-                var validPaths = paths.Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
-                var preferredPath = validPaths.FirstOrDefault(p => p.Trim().EndsWith(".cmd")) ?? validPaths.FirstOrDefault();
-                if (!string.IsNullOrWhiteSpace(preferredPath))
-                {
-                    return preferredPath.Trim();
-                }
+            var paths = output.Trim().Split('\n', '\r');
+            // Prefer .cmd files over batch files, filter out empty lines
+            var validPaths = paths.Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
+            var preferredPath = validPaths.FirstOrDefault(p => p.Trim().EndsWith(".cmd")) ?? validPaths.FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(preferredPath))
+            {
+                return preferredPath.Trim();
+            }
             }
         }
-        catch (Exception)
+        catch (InvalidOperationException)
         {
             // Fall back to manual search if 'where' command fails or times out
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            // Fall back to manual search if 'where.exe' is not found
         }
 
         // Try common Windows Azure CLI locations
