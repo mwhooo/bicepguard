@@ -105,46 +105,156 @@ cd DriftGuard
 dotnet build
 ```
 
-### Basic Usage Examples
+### Parameter File Approaches
 
-#### Using Docker
+DriftGuard supports three ways to provide parameters to your Bicep templates:
+
+| Approach | Bicep File | Parameters | Use Case | Example File |
+|----------|-----------|-----------|----------|--------------|
+| **Plain Bicep** | `template.bicep` | None (no params in template) | Simple templates with hardcoded config | `template.bicep` |
+| **Bicep + JSON Params** | `template.bicep` | `--parameters-file params.json` | Templates with parameterized config | `template.bicep` + `params.json` |
+| **Bicepparam File** | `template.bicepparam` | Built-in (via `using` statement) | Modern Bicep with self-contained params | `template.bicepparam` |
+
+**Note:** You cannot use both `.bicepparam` file and `--parameters-file` together — choose one approach.
+
+### Usage by Deployment Type
+
+#### 1️⃣ Plain Bicep Template (No Parameters)
+
+Use this when your template has no parameters or they're all hardcoded.
+
+**Docker (Resource-Group Scope):**
 ```bash
-# Detect drift using a Bicep template (resource-group scope)
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
   mwhooo/driftguard \
   --bicep-file template.bicep \
   --resource-group myResourceGroup
+```
 
-# Detect drift using a Bicepparam file
+**Native Binary (Resource-Group Scope):**
+```bash
+dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup
+```
+
+**Docker (Subscription Scope):**
+```bash
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --scope Subscription \
+  --subscription <subscription-id> \
+  --location westeurope
+```
+
+**Native Binary (Subscription Scope):**
+```bash
+dotnet run -- \
+  --bicep-file template.bicep \
+  --scope Subscription \
+  --subscription <subscription-id> \
+  --location westeurope
+```
+
+---
+
+#### 2️⃣ Bicep + JSON Parameters File
+
+Use this when you have separate `.bicep` and `.json` parameter files. This approach is useful for environment-specific parameters.
+
+**Docker (Resource-Group Scope):**
+```bash
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --parameters-file params.json \
+  --resource-group myResourceGroup
+```
+
+**Native Binary (Resource-Group Scope):**
+```bash
+dotnet run -- \
+  --bicep-file template.bicep \
+  --parameters-file params.json \
+  --resource-group myResourceGroup
+```
+
+**Docker (Subscription Scope with Different Environment):**
+```bash
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file infra.bicep \
+  --parameters-file prod-params.json \
+  --scope Subscription \
+  --subscription <subscription-id> \
+  --location westeurope
+```
+
+**Native Binary (Subscription Scope):**
+```bash
+dotnet run -- \
+  --bicep-file infra.bicep \
+  --parameters-file prod-params.json \
+  --scope Subscription \
+  --subscription <subscription-id> \
+  --location westeurope
+```
+
+---
+
+#### 3️⃣ Bicepparam File (Self-Contained)
+
+Use this modern approach with `.bicepparam` files. Parameters are defined inline with a `using` reference to the template, making it self-documenting.
+
+**Docker (Resource-Group Scope):**
+```bash
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
   mwhooo/driftguard \
   --bicep-file template.bicepparam \
   --resource-group myResourceGroup
+```
 
-# Detect drift for subscription-scope deployments
+**Native Binary (Resource-Group Scope):**
+```bash
+dotnet run -- --bicep-file template.bicepparam --resource-group myResourceGroup
+```
+
+**Docker (Subscription Scope):**
+```bash
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
   mwhooo/driftguard \
-  --bicep-file infra.bicep \
+  --bicep-file infra.bicepparam \
   --scope Subscription \
   --subscription <subscription-id> \
   --location westeurope
+```
 
-# Automatically fix detected drift
-docker run --rm \
-  -v ~/.azure:/root/.azure \
-  -v $(pwd):/workspace \
-  mwhooo/driftguard \
-  --bicep-file template.bicepparam \
-  --resource-group myResourceGroup \
-  --autofix
+**Native Binary (Subscription Scope):**
+```bash
+dotnet run -- \
+  --bicep-file infra.bicepparam \
+  --scope Subscription \
+  --subscription <subscription-id> \
+  --location westeurope
+```
 
-# Generate HTML report (saved to your mounted workspace)
+---
+
+### Output Formats & Advanced Options
+
+#### Generate HTML Reports
+```bash
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
@@ -154,15 +264,35 @@ docker run --rm \
   --output Html
 ```
 
-#### Using Native Binary
+#### JSON Output for CI/CD Automation
 ```bash
-# Detect drift using a Bicep template
-dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup \
+  --output Json
+```
 
-# Generate JSON report for automation
+**Native Binary:**
+```bash
 dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup --output Json
+```
 
-# Use custom ignore configuration to suppress Azure platform noise
+#### Automatically Fix Detected Drift
+```bash
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup \
+  --autofix
+```
+
+#### Use Custom Ignore Configuration
+```bash
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
@@ -172,9 +302,24 @@ docker run --rm \
   --ignore-config custom-ignore.json
 ```
 
-**Native Binary Alternative:**
+**Native Binary:**
 ```bash
-dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup --ignore-config custom-ignore.json
+dotnet run -- \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup \
+  --ignore-config custom-ignore.json
+```
+
+#### CI/CD Mode (JSON + Simple ASCII Output)
+```bash
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup \
+  --output Json \
+  --simple-output
 ```
 
 > 📖 **Need to configure drift ignore rules?** See our comprehensive [Drift Ignore Configuration Guide](docs/DRIFT-IGNORE.md) with examples for common Azure services and best practices.
