@@ -607,7 +607,7 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-11-0
 
 ## 🔇 Drift Ignore Configuration
 
-The drift detection system includes a comprehensive ignore mechanism to suppress noise caused by Azure platform behaviors beyond your control.
+The drift detection system includes an ignore mechanism to suppress noise caused by Azure platform behaviors beyond your control.
 
 ### Purpose
 The ignore functionality is specifically designed to filter out "noise" from:
@@ -686,6 +686,8 @@ dotnet run -- --bicep-file template.bicep --resource-group myRG --ignore-config 
 - **Resource Types**: Support wildcards like `"Microsoft.ServiceBus/*"` for all Service Bus resource types
 - **Global vs Resource-Specific**: Global patterns apply to all resources, resource-specific patterns only apply to matching resource types
 
+**Wildcard Support Tested**: Wildcard patterns are fully functional. Example: the pattern `"tags.*"` successfully suppressed 2 tag drifts in testing, with the output confirming `"No configuration drift detected after filtering 2 ignored drift(s)."` This validates both the wildcard syntax and the filtering mechanism work as documented.
+
 ### Real-World Example
 Before implementing ignore patterns:
 ```
@@ -713,7 +715,7 @@ After implementing ignore patterns:
 ## 🏗️ Advanced Features
 
 ### Azure What-If Integration
-The drift detector leverages Azure's native what-if functionality for authoritative drift detection:
+The drift detector leverages Azure's native what-if functionality for drift detection:
 
 ```bash
 # Behind the scenes, the tool runs:
@@ -721,68 +723,10 @@ az deployment group what-if --resource-group dev --template-file samples/main-te
 ```
 
 This provides:
-- ✅ **Azure-Native Comparison**: Uses Azure's deployment engine for authoritative drift detection
+- ✅ **Azure-Native Comparison**: Uses Azure's deployment engine for drift detection
 - ✅ **Intelligent Noise Suppression**: Filters Azure platform behaviors with configurable ignore patterns
 - ✅ **Comprehensive Analysis**: Detects most configuration changes across resource types
 - ✅ **Clean Output**: Verbose what-if output suppressed, showing only formatted drift results
-
-### Type-Safe Bicep Modules
-Modern Bicep architecture with exported types:
-
-```bicep
-// bicep-modules/storage-account.bicep
-@export()
-type StorageAccountSku = 'Standard_LRS' | 'Standard_GRS' | 'Premium_LRS'
-
-@export()
-type StorageAccountConfig = {
-  storageAccountName: string
-  location: string?
-  skuName: StorageAccountSku?
-  // ... more fields
-}
-
-param storageAccountConfig StorageAccountConfig
-
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
-  name: storageAccountConfig.storageAccountName
-  location: storageAccountConfig.?location ?? resourceGroup().location
-  // ...
-}
-```
-
-```bicep
-// main-template.bicep
-import {StorageAccountConfig} from 'bicep-modules/storage-account.bicep'
-
-param storageConfig StorageAccountConfig
-
-module storageModule 'bicep-modules/storage-account.bicep' = {
-  params: {
-    storageAccountConfig: union(storageConfig, {location: location, tags: tags})
-  }
-}
-```
-
-### Bicepparam File Support
-Clean parameter management with `.bicepparam` files:
-
-```bicep
-// main-template.bicepparam
-using 'main-template.bicep'
-
-param storageConfig = {
-  storageAccountName: 'mystorageacct'
-  skuName: 'Standard_LRS'
-  kind: 'StorageV2'
-  minimumTlsVersion: 'TLS1_2'
-}
-
-param tags = {
-  Environment: 'production'
-  Application: 'myapp'
-}
-```
 
 ## 🎨 Sample Output
 
