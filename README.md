@@ -441,17 +441,20 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
 
 **Drift Detection Result:**
 ```
-🔄 tags.Environment (Modified)
-   Expected: "test"
-   Actual:   "production"
+� Microsoft.Storage/storageAccounts - drifttestsay6kt676i
+   Property Drifts: 3
 
-❓ tags.ManualTag (Added)
-   Expected: "not set"
-   Actual:   "test"
+   🔄 tags.Environment (Modified)
+      Expected: "test"
+      Actual:   "production"
 
-❌ tags.ResourceType (Missing)
-   Expected: "Infrastructure"
-   Actual:   "removed"
+   ➕ tags.ManualTag (Extra)
+      Expected: not set
+      Actual:   "test"
+
+   ❌ tags.ResourceType (Missing)
+      Expected: "Infrastructure"
+      Actual:   not set
 ```
 
 ### Scenario 4: Missing Resource Detection
