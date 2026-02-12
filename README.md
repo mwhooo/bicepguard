@@ -352,7 +352,7 @@ subnets: [
 **Template Definition:**
 ```bicep
 resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-04-01' = {
-  name: 'myapp-nsg'
+  name: 'drifttest-nsg'
   properties: {
     securityRules: [
       {
@@ -363,20 +363,51 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-04-0
         protocol: 'Tcp'
         sourcePortRange: '*'
         destinationPortRange: '80'
+        sourceAddressPrefix: '*'
+        destinationAddressPrefix: '*'
+      }
+      {
+        name: 'AllowHTTPS'
+        priority: 110
+        access: 'Allow'
+        direction: 'Inbound'
+        protocol: 'Tcp'
+        sourcePortRange: '*'
+        destinationPortRange: '443'
+        sourceAddressPrefix: '*'
+        destinationAddressPrefix: '*'
       }
     ]
   }
 }
 ```
 
-**Manual Change in Portal:** Added SSH rule with priority 200
+**Manual Change in Portal:** Added SSH rule (AllowSSH) with priority 120
 
 **Drift Detection Result:**
 ```
-🔄 properties.securityRules (Modified)
-   Expected: "configured in template"
-   Actual:   "differs in Azure (complex object/array)"
+🔴 Microsoft.Network/networkSecurityGroups - drifttest-nsg
+   Property Drifts: 1
+
+   ➕ properties.securityRules.2 (Extra)
+      Expected: not set
+      Actual:  
+        {
+          "name": "AllowSSH",
+          "properties": {
+            "access": "Allow",
+            "destinationAddressPrefix": "*",
+            "destinationPortRange": "22",
+            "direction": "Inbound",
+            "priority": 120,
+            "protocol": "Tcp",
+            "sourceAddressPrefix": "*",
+            "sourcePortRange": "*"
+          }
+        }
 ```
+
+The detector identifies the exact array index (2) and shows the complete rule definition, making it easy to see what was added or modified.
 
 ### Scenario 3: Storage Account Tag Drift
 **Template Definition:**
