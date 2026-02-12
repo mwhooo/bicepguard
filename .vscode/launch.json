@@ -9,7 +9,7 @@
             "program": "${workspaceFolder}/bin/Debug/net8.0/DriftGuard.dll",
             "args": [
                 "--bicep-file",
-                "samples/main-template.bicep",
+                "samples/main-template.bicepparam",
                 "--resource-group",
                 "dev",
                 "--output",

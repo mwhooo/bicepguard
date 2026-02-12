@@ -99,7 +99,7 @@ public static class DriftGuardCommand
         try
         {
             // Set up console encoding and simple output mode
-            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.OutputEncoding = System.Text.Encoding.UTF8; // this supports emojis in the console output
             Environment.SetEnvironmentVariable("SIMPLE_OUTPUT", simpleOutput.ToString());
             Environment.SetEnvironmentVariable("SHOW_FILTERED", showFiltered.ToString());
 

@@ -5,6 +5,7 @@ namespace DriftGuard.CLI;
 
 /// <summary>
 /// Defines all command-line options for DriftGuard.
+/// static helpers methods
 /// </summary>
 public static class CommandLineOptions
 {

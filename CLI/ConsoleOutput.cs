@@ -77,7 +77,7 @@ public static class ConsoleOutput
         bool showFiltered,
         bool simpleOutput)
     {
-        var version = typeof(ConsoleOutput).Assembly
+        var version = typeof(ConsoleOutput).Assembly //trying to get version from the assembly info, if not found default to 0.0.0
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
             .InformationalVersion ?? "0.0.0";
 

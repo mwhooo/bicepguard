@@ -53,7 +53,7 @@ public static class InputValidator
 
         if (!parametersFile.Extension.Equals(".json", StringComparison.OrdinalIgnoreCase))
         {
-            return (false, $"Parameters file must have a .json extension: {parametersFile.FullName}");
+            return (false, $"Parameters file must have a .json extension: {parametersFile.FullName}, bicepparams can be fed directly via --bicep-file");
         }
 
         return (true, null);
