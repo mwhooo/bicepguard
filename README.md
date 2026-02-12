@@ -2,7 +2,7 @@
 
 A sophisticated C# console application that detects configuration drift between Bicep/ARM templates and live Azure resources. Built for DevOps teams practicing Infrastructure as Code (IaC) to ensure deployed resources match their intended configuration.
 
-> 🔗 **Want to add drift detection to your Azure repos?** See our [Integration Guide](docs/INTEGRATION.md) for quick setup using reusable workflows.
+> 🔗 **Want to add drift detection to your Azure repos?** See check the [Integration Guide](docs/INTEGRATION.md) for quick setup using reusable workflows.
 
 ## 🎯 Purpose
 
@@ -409,7 +409,7 @@ The detector identifies the exact array index (2) and shows the complete rule de
       Actual:   "8080"
 ```
 
-When properties within an existing rule are modified, DriftGuard shows the specific property path and the before/after values, making it clear exactly what changed.
+When properties within an existing rule are modified, DriftGuard shows the specific property path and the Expected/Actual values, making it clear exactly what changed.
 
 ### Scenario 3: Storage Account Tag Drift
 **Template Definition:**
@@ -452,56 +452,66 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-04-0
 }
 ```
 
-**Azure Reality:** NSG was never deployed or was deleted
+**Azure Reality:** The NSG resource defined in the template doesn't exist in Azure (was deleted or never deployed)
 
 **Drift Detection Result:**
 ```
-❌ resource (Missing)
-   Expected: "exists"
-   Actual:   "missing"
+🔴 Microsoft.Network/networkSecurityGroups - drifttest-nsg
+   Property Drifts: 1
+
+   ❌ resource (Missing)
+      Expected: "defined in template"
+      Actual:   "missing in Azure"
 ```
 
-Note: Internally the detector interprets Azure what-if `+` (create) lines as a Missing drift when the resource is defined in the template but does not exist in the target Azure environment. This makes deleted or never-deployed resources visible in drift reports (see PR #71).
+When a resource is defined in the template but missing in Azure, DriftGuard flags it with ❌ and shows the mismatch between the template definition and Azure reality. This is how DriftGuard detects deleted or never-deployed resources.
 
 ### Scenario 5: Automatic Drift Remediation with --autofix
-**Template Definition:**
-```bicep
-resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-04-01' = {
-  name: '${applicationName}-nsg'
-  properties: {
-    securityRules: [
-      {
-        name: 'AllowHTTP'
-        properties: {
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '80'
-          access: 'Allow'
-          direction: 'Inbound'
-          priority: 100
-        }
-      }
-    ]
-  }
-}
-```
+**Situation:** Multiple resources have drifted from template (missing resource, modified tags, extra tags)
 
-**Manual Change:** Added SSH rule via Azure Portal
-
-**Drift Detection with Autofix:**
+**Command:**
 ```bash
-dotnet run -- --bicep-file template.bicep --resource-group myRG --autofix
+dotnet run -- --bicep-file template.bicepparam --resource-group myRG --autofix
 ```
 
 **Output:**
 ```
+🔍 AZURE DRIFTGUARD - CONFIGURATION DRIFT DETECTION REPORT
+============================================================
+📅 Detection Time: 2026-02-12 20:27:27 UTC
+📊 Summary: Configuration drift detected in 2 resource(s) with 4 property difference(s).
+
+❌ Configuration drift detected in 2 resource(s):
+
+🔴 Microsoft.Network/networkSecurityGroups - myapp-nsg
+   Property Drifts: 1
+
+   ❌ resource (Missing)
+      Expected: "defined in template"
+      Actual:   "missing in Azure"
+
+🔴 Microsoft.Storage/storageAccounts - mystorageacct
+   Property Drifts: 2
+
+   🔄 tags.Environment (Modified)
+      Expected: "test"
+      Actual:   "production"
+
+   ➕ tags.ManualTag (Extra)
+      Expected: not set
+      Actual:   "added-manually"
+
+============================================================
 ❌ Configuration drift detected!
 🔧 Attempting to fix drift by deploying template...
 🚀 Deploying Bicep template to resource group: myRG
+📄 Template file: /path/to/template.bicepparam
 ✅ Deployment completed successfully!
 ✅ Drift has been automatically fixed!
-📦 Deployment Name: drift-autofix-20251113-150351
+📦 Deployment Name: drift-autofix-20260212-202727
 ```
+
+When drift is detected and `--autofix` is used, DriftGuard shows the full drift report first, then automatically deploys the template with a timestamped deployment name for tracking. All drifted resources are restored to match the template definition.
 
 ### Scenario 6: Conditional Deployment Support
 **Template Definition:**
@@ -517,7 +527,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = if (deployKeyVault) {
 ## 🔗 External Module Support
 
 ### Azure Container Registry Integration
-The tool provides comprehensive support for external Bicep modules from Azure Container Registry and Azure Verified Modules (AVM):
+The tool provides support for external Bicep modules from Azure Container Registry and Azure Verified Modules (AVM):
 
 #### Supported Module Syntax
 ```bicep
