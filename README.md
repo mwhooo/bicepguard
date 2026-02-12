@@ -409,6 +409,22 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-04-0
 
 The detector identifies the exact array index (2) and shows the complete rule definition, making it easy to see what was added or modified.
 
+**Scenario 2b: Modified Security Rule Property**
+
+**Change in Portal:** Modify existing AllowHTTP rule's destination port from 80 to 8080
+
+**Drift Detection Result:**
+```
+🔴 Microsoft.Network/networkSecurityGroups - drifttest-nsg
+   Property Drifts: 1
+
+   🔄 properties.securityRules.0.properties.destinationPortRange (Modified)
+      Expected: "80"
+      Actual:   "8080"
+```
+
+When properties within an existing rule are modified, DriftGuard shows the specific property path and the before/after values, making it clear exactly what changed.
+
 ### Scenario 3: Storage Account Tag Drift
 **Template Definition:**
 ```bicep
