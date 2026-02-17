@@ -16,13 +16,13 @@ public static class AzureCliPathResolver
     /// <exception cref="InvalidOperationException">Thrown when Azure CLI cannot be found.</exception>
     public static string GetAzureCLIPath()
     {
-        // On Linux/Docker, just use 'az' from PATH
+        // On Linux/Docker, just use 'az' from PATH, since it should be installed as mentioned in the readme
         if (Environment.OSVersion.Platform == PlatformID.Unix)
         {
             return "az";
         }
 
-        // On Windows, try to find az using 'where' command (most reliable)
+        // On Windows, try to find az using 'where' command (most reliable), tried WMI method as well, but seems slower and less reliable than 'where' for this purpose
         try
         {
             using var whereProcess = new Process
