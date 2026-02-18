@@ -1,4 +1,4 @@
-using DriftGuard.Models;
+using BicepGuard.Models;
 using System.Reflection;
 
 namespace BicepGuard.CLI;

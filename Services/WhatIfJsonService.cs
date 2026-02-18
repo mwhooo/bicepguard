@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
-using DriftGuard.Models;
+using BicepGuard.Models;
 
 namespace BicepGuard.Services;
 
