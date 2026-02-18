@@ -1,10 +1,10 @@
 # 🔗 BicepGuard Integration Guide
 
-This guide shows how to integrate DriftGuard into your existing Azure infrastructure repositories to enable automated drift detection.
+This guide shows how to integrate BicepGuard into your existing Azure infrastructure repositories to enable automated drift detection.
 
 ## 📋 Prerequisites
 
-Before integrating DriftGuard, ensure you have:
+Before integrating BicepGuard, ensure you have:
 
 - [ ] Azure subscription with resources to monitor
 - [ ] Bicep templates defining your infrastructure
@@ -15,7 +15,7 @@ Before integrating DriftGuard, ensure you have:
 
 ### Option 1: Reusable Workflow (Recommended)
 
-The fastest way to integrate DriftGuard is using our reusable workflow. Add this file to your repository:
+The fastest way to integrate BicepGuard is using our reusable workflow. Add this file to your repository:
 
 **`.github/workflows/drift-monitoring.yml`**
 
@@ -34,7 +34,7 @@ permissions:
 
 jobs:
   detect-drift:
-    uses: NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/.github/workflows/drift-detection-reusable.yml@v4.0.0
+    uses: mwhooo/bicepguard/.github/workflows/drift-detection-reusable.yml@v4.0.0
     with:
       bicep-file: 'infrastructure/main.bicepparam'
       resource-group: 'my-resource-group'
@@ -64,7 +64,7 @@ permissions:
 
 jobs:
   dev:
-    uses: NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/.github/workflows/drift-detection-reusable.yml@v4.0.0
+    uses: mwhooo/bicepguard/.github/workflows/drift-detection-reusable.yml@v4.0.0
     with:
       bicep-file: 'infrastructure/main.bicepparam'
       resource-group: 'myapp-dev-rg'
@@ -75,7 +75,7 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
   staging:
-    uses: NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/.github/workflows/drift-detection-reusable.yml@v4.0.0
+    uses: mwhooo/bicepguard/.github/workflows/drift-detection-reusable.yml@v4.0.0
     with:
       bicep-file: 'infrastructure/main.bicepparam'
       resource-group: 'myapp-staging-rg'
@@ -86,7 +86,7 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
   production:
-    uses: NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/.github/workflows/drift-detection-reusable.yml@v4.0.0
+    uses: mwhooo/bicepguard/.github/workflows/drift-detection-reusable.yml@v4.0.0
     with:
       bicep-file: 'infrastructure/main.bicepparam'
       resource-group: 'myapp-prod-rg'
@@ -106,7 +106,7 @@ jobs:
 | `bicep-file` | ✅ | - | Path to Bicep template or .bicepparam file |
 | `resource-group` | ✅ | - | Azure resource group to monitor |
 | `environment-name` | ❌ | `production` | Environment name for reporting |
-| `driftguard-version` | ❌ | `v4.0.0` | DriftGuard version to use |
+| `bicepguard-version` | ❌ | `v4.0.0` | BicepGuard version to use |
 | `autofix` | ❌ | `false` | Auto-deploy template to fix drift |
 | `create-issue` | ❌ | `true` | Create GitHub issue on drift |
 | `ignore-config` | ❌ | - | Path to custom drift-ignore.json |
@@ -125,7 +125,7 @@ jobs:
 
 ```bash
 # Create service principal with Reader role
-az ad sp create-for-rbac --name "DriftGuard-YourApp" \
+az ad sp create-for-rbac --name "BicepGuard-YourApp" \
   --role "Reader" \
   --scopes "/subscriptions/YOUR_SUBSCRIPTION_ID/resourceGroups/YOUR_RG"
 ```
@@ -134,7 +134,7 @@ az ad sp create-for-rbac --name "DriftGuard-YourApp" \
 
 ```bash
 # Get the Application ID
-APP_ID=$(az ad app list --display-name "DriftGuard-YourApp" --query "[0].appId" -o tsv)
+APP_ID=$(az ad app list --display-name "BicepGuard-YourApp" --query "[0].appId" -o tsv)
 
 # Create federated credential for main branch
 az ad app federated-credential create --id $APP_ID --parameters '{
@@ -184,7 +184,7 @@ Then reference it in your workflow:
 ```yaml
 jobs:
   detect-drift:
-    uses: NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/.github/workflows/drift-detection-reusable.yml@v4.0.0
+    uses: mwhooo/bicepguard/.github/workflows/drift-detection-reusable.yml@v4.0.0
     with:
       bicep-file: 'infrastructure/main.bicepparam'
       resource-group: 'my-resource-group'
@@ -200,7 +200,7 @@ Enable automatic drift remediation (use with caution in production):
 ```yaml
 jobs:
   detect-and-fix:
-    uses: NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/.github/workflows/drift-detection-reusable.yml@v4.0.0
+    uses: mwhooo/bicepguard/.github/workflows/drift-detection-reusable.yml@v4.0.0
     with:
       bicep-file: 'infrastructure/main.bicepparam'
       resource-group: 'my-dev-rg'
@@ -214,7 +214,7 @@ jobs:
 
 ## 📊 Understanding Drift Reports
 
-When drift is detected, DriftGuard will:
+When drift is detected, BicepGuard will:
 
 1. **Create a GitHub Issue** with details about the drift
 2. **Upload artifacts** with JSON reports
@@ -236,7 +236,7 @@ Drifted Resources:
 
 ## 🔄 Migration from Standalone Monitoring
 
-If you're currently running DriftGuard manually or with a custom workflow:
+If you're currently running BicepGuard manually or with a custom workflow:
 
 1. Remove your existing drift monitoring workflow
 2. Add the reusable workflow as shown above
@@ -268,4 +268,4 @@ gh run watch
 - [Drift Ignore Configuration](DRIFT-IGNORE.md) - Complete ignore pattern reference
 - [OIDC Authentication Setup](OIDC-SETUP.md) - Detailed Azure OIDC guide
 - [Monitoring Best Practices](MONITORING.md) - Tips for effective monitoring
-- [Main Documentation](../README.md) - Full DriftGuard documentation
+- [Main Documentation](../README.md) - Full BicepGuard documentation

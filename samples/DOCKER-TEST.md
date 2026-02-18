@@ -1,6 +1,6 @@
-# Testing DriftGuard Docker Container with Samples
+# Testing BicepGuard Docker Container with Samples
 
-This guide shows how to test the DriftGuard container with the sample templates.
+This guide shows how to test the BicepGuard container with the sample templates.
 
 ## ✅ Authentication Works!
 
@@ -15,7 +15,7 @@ Mount your Azure CLI config directory:
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd)/samples:/workspace \
-  driftguard:test \
+  bicepguard:test \
   --bicep-file main-template.bicepparam \
   --resource-group your-resource-group
 ```
@@ -34,7 +34,7 @@ docker run --rm \
   -e AZURE_CLIENT_SECRET=$AZURE_CLIENT_SECRET \
   -e AZURE_TENANT_ID=$AZURE_TENANT_ID \
   -v $(pwd)/samples:/workspace \
-  driftguard:test \
+  bicepguard:test \
   --bicep-file main-template.bicepparam \
   --resource-group your-resource-group
 ```
@@ -50,7 +50,7 @@ When running on Azure VMs or Container Instances with managed identity:
 ```bash
 docker run --rm \
   -v $(pwd)/samples:/workspace \
-  driftguard:test \
+  bicepguard:test \
   --bicep-file main-template.bicepparam \
   --resource-group your-resource-group
 ```
@@ -68,7 +68,7 @@ docker run --rm \
 # Test if Azure CLI works in the container
 docker run --rm --entrypoint sh \
   -v ~/.azure:/root/.azure \
-  driftguard:test \
+  bicepguard:test \
   -c "az account show --query '{name:name, id:id}' -o table"
 ```
 
@@ -79,10 +79,10 @@ Name
 ATOS BNN PLATFORM MGMT
 ```
 
-### 2. Run DriftGuard Help
+### 2. Run BicepGuard Help
 
 ```bash
-docker run --rm driftguard:test --help
+docker run --rm bicepguard:test --help
 ```
 
 ### 3. Test with Sample Template
@@ -90,18 +90,18 @@ docker run --rm driftguard:test --help
 First, create a test resource group (if it doesn't exist):
 
 ```bash
-az group create --name driftguard-test --location westeurope
+az group create --name bicepguard-test --location westeurope
 ```
 
-Then run DriftGuard:
+Then run BicepGuard:
 
 ```bash
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd)/samples:/workspace \
-  driftguard:test \
+  bicepguard:test \
   --bicep-file main-template.bicepparam \
-  --resource-group driftguard-test
+  --resource-group bicepguard-test
 ```
 
 ### 4. With Custom Ignore Configuration
@@ -111,9 +111,9 @@ docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd)/samples:/workspace \
   -v $(pwd)/drift-ignore.json:/workspace/drift-ignore.json:ro \
-  driftguard:test \
+  bicepguard:test \
   --bicep-file main-template.bicepparam \
-  --resource-group driftguard-test \
+  --resource-group bicepguard-test \
   --ignore-config drift-ignore.json
 ```
 
@@ -123,9 +123,9 @@ docker run --rm \
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd)/samples:/workspace \
-  driftguard:test \
+  bicepguard:test \
   --bicep-file main-template.bicepparam \
-  --resource-group driftguard-test \
+  --resource-group bicepguard-test \
   --output Html
 ```
 
@@ -137,7 +137,7 @@ When using the container, the file structure looks like:
 
 ```
 Container:
-  /opt/driftguard/        ← DriftGuard binary
+  /opt/bicepguard/        ← BicepGuard binary
   /workspace/             ← Your mounted files (templates, configs, output)
     ├── main-template.bicep
     ├── main-template.bicepparam
@@ -146,7 +146,7 @@ Container:
 ```
 
 **Key Points:**
-- Application is in `/opt/driftguard`
+- Application is in `/opt/bicepguard`
 - Working directory is `/workspace`
 - Mount your templates to `/workspace`
 - All file paths are relative to `/workspace`
@@ -203,7 +203,7 @@ Then mount credentials:
 
 ```yaml
 - task: Docker@2
-  displayName: 'Run DriftGuard'
+  displayName: 'Run BicepGuard'
   inputs:
     command: 'run'
     arguments: >
@@ -212,7 +212,7 @@ Then mount credentials:
       -e AZURE_CLIENT_ID=$(AZURE_CLIENT_ID)
       -e AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET)
       -e AZURE_TENANT_ID=$(AZURE_TENANT_ID)
-      mwhooo/driftguard:latest
+      mwhooo/bicepguard:latest
       --bicep-file main-template.bicepparam
       --resource-group $(ResourceGroup)
       --output Json > drift-report.json
@@ -221,14 +221,14 @@ Then mount credentials:
 ### GitHub Actions
 
 ```yaml
-- name: Run DriftGuard
+- name: Run BicepGuard
   run: |
     docker run --rm \
       -v ${{ github.workspace }}/templates:/workspace \
       -e AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }} \
       -e AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }} \
       -e AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }} \
-      mwhooo/driftguard:latest \
+      mwhooo/bicepguard:latest \
       --bicep-file main.bicepparam \
       --resource-group ${{ env.RESOURCE_GROUP }} \
       --output Markdown
@@ -243,11 +243,11 @@ set -e
 RESOURCE_GROUP="your-rg"
 TEMPLATE_DIR="./bicep"
 
-echo "Running DriftGuard..."
+echo "Running BicepGuard..."
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v "$TEMPLATE_DIR:/workspace" \
-  mwhooo/driftguard:latest \
+  mwhooo/bicepguard:latest \
   --bicep-file main.bicepparam \
   --resource-group "$RESOURCE_GROUP" \
   --output Html
@@ -260,10 +260,10 @@ echo "Drift report generated: drift-report.html"
 You'll know it's working when you see:
 
 ```
-🔍 Azure DriftGuard v5.0.0
+🔍 Azure BicepGuard v6.0.0
 📄 Bicep Template: main-template.bicepparam
 🎯 Deployment Scope: ResourceGroup
-🏗️  Resource Group: driftguard-test
+🏗️  Resource Group: bicepguard-test
 📊 Output Format: Console
 ```
 

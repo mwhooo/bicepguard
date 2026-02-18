@@ -27,7 +27,7 @@ docker pull mwhooo/bicepguard:5.0.0
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard:latest \
+  mwhooo/bicepguard:latest \
   --bicep-file template.bicep \
   --resource-group myResourceGroup
 ```
@@ -36,13 +36,13 @@ docker run --rm \
 
 ### 1. Mount Current Directory
 
-Run DriftGuard on a template in your current directory:
+Run BicepGuard on a template in your current directory:
 
 ```bash
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard:latest \
+  mwhooo/bicepguard:latest \
   --bicep-file main.bicep \
   --resource-group myRG
 ```
@@ -55,7 +55,7 @@ Enable automatic drift remediation:
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard:latest \
+  mwhooo/bicepguard:latest \
   --bicep-file template.bicep \
   --resource-group myRG \
   --autofix
@@ -69,7 +69,7 @@ Output HTML report to local directory:
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard:latest \
+  mwhooo/bicepguard:latest \
   --bicep-file template.bicep \
   --resource-group myRG \
   --output Html
@@ -83,7 +83,7 @@ Use a custom drift-ignore.json file:
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard:latest \
+  mwhooo/bicepguard:latest \
   --bicep-file template.bicep \
   --resource-group myRG \
   --ignore-config custom-ignore.json
@@ -102,7 +102,7 @@ docker run --rm \
       docker run --rm \
         -v $(Build.SourcesDirectory):/workspace \
         -e AZURE_CONFIG_DIR=/root/.azure \
-        mwhooo/driftguard:latest \
+        mwhooo/bicepguard:latest \
         --bicep-file /workspace/template.bicep \
         --resource-group $(resourceGroup) \
         --output Json > drift-report.json
@@ -111,11 +111,11 @@ docker run --rm \
 ### 6. GitHub Actions
 
 ```yaml
-- name: Run DriftGuard
+- name: Run BicepGuard
   run: |
     docker run --rm \
       -v ${{ github.workspace }}:/workspace \
-      mwhooo/driftguard:latest \
+      mwhooo/bicepguard:latest \
       --bicep-file /workspace/main.bicep \
       --resource-group ${{ env.RESOURCE_GROUP }}
 ```
@@ -142,7 +142,7 @@ docker run --rm \
   -e AZURE_CLIENT_SECRET=$AZURE_CLIENT_SECRET \
   -e AZURE_TENANT_ID=$AZURE_TENANT_ID \
   -v $(pwd):/workspace \
-  mwhooo/driftguard:latest \
+  mwhooo/bicepguard:latest \
   --bicep-file /workspace/template.bicep \
   --resource-group myRG
 ```
@@ -154,7 +154,7 @@ No credentials needed when running on Azure compute with managed identity enable
 ```bash
 docker run --rm \
   -v $(pwd):/workspace \
-  mwhooo/driftguard:latest \
+  mwhooo/bicepguard:latest \
   --bicep-file /workspace/template.bicep \
   --resource-group myRG
 ```
@@ -180,8 +180,8 @@ docker run --rm \
 
 **This image is publicly available on Docker Hub!**
 
-- **Repository:** https://hub.docker.com/r/mwhooo/driftguard
-- **Pull Command:** `docker pull mwhooo/driftguard`
+- **Repository:** https://hub.docker.com/r/mwhooo/bicepguard
+- **Pull Command:** `docker pull mwhooo/bicepguard`
 - **No Authentication Required:** Anyone can pull and use the image
 - **Free:** Docker Hub public images are free with unlimited pulls
 
@@ -202,7 +202,7 @@ Test authentication first:
 ```bash
 docker run --rm \
   -v ~/.azure:/root/.azure:ro \
-  mwhooo/driftguard:latest \
+  mwhooo/bicepguard:latest \
   bash -c "az account show"
 ```
 
@@ -212,7 +212,7 @@ The container includes the latest Bicep CLI. To verify:
 
 ```bash
 docker run --rm \
-  mwhooo/driftguard:latest \
+  mwhooo/bicepguard:latest \
   bash -c "az bicep version"
 ```
 
@@ -222,13 +222,13 @@ To build the image locally:
 
 ```bash
 # Build
-docker build -t driftguard:local .
+docker build -t bicepguard:local .
 
 # Run
 docker run --rm \
   -v $(pwd):/workspace \
   -v ~/.azure:/root/.azure:ro \
-  driftguard:local \
+  bicepguard:local \
   --bicep-file /workspace/template.bicep \
   --resource-group myRG
 ```
@@ -252,5 +252,5 @@ docker run --rm \
 ## Support
 
 For issues or questions:
-- GitHub Issues: https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/issues
+- GitHub Issues: https://github.com/mwhooo/bicepguard/issues
 - Internal Documentation: See `docs/` directory

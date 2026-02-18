@@ -1,17 +1,17 @@
 # Release Notes
 
-## Version 4.0.0 - Azure DriftGuard Rebrand (2026-01-12)
+## Version 4.0.0 - Azure BicepGuard Rebrand (2026-01-12)
 
 ### 🎯 Summary
-Major release introducing the **Azure DriftGuard** rebrand to clearly identify this as an Azure-specific configuration drift detection tool.
+Major release introducing the **Azure BicepGuard** rebrand to clearly identify this as an Azure-specific configuration drift detection tool.
 
 ### ✨ Branding Changes
 
-#### 🌐 Azure DriftGuard Identity
-- **Product Renamed**: From "DriftGuard" to "Azure DriftGuard" throughout all user-facing surfaces
-- **CLI Banner**: Updated to "Azure DriftGuard v4.0.0"
-- **Console Reports**: Header now shows "AZURE DRIFTGUARD - CONFIGURATION DRIFT DETECTION REPORT"
-- **HTML Reports**: Title updated to "Azure DriftGuard - Configuration Drift Detection Report"
+#### 🌐 Azure BicepGuard Identity
+- **Product Renamed**: From "DriftGuard" to "Azure BicepGuard" throughout all user-facing surfaces
+- **CLI Banner**: Updated to "Azure BicepGuard v4.0.0"
+- **Console Reports**: Header now shows "AZURE BICEPGUARD - CONFIGURATION DRIFT DETECTION REPORT"
+- **HTML Reports**: Title updated to "Azure BicepGuard - Configuration Drift Detection Report"
 - **Markdown Reports**: Header updated with Azure branding
 - **Assembly Metadata**: Product name in .csproj updated
 
@@ -27,7 +27,7 @@ The "Azure" prefix makes this clear to users and distinguishes it from generic d
 ### 🔧 Technical Details
 - Updated `Program.cs` root command description and version banner
 - Updated `ReportingService.cs` for Console, HTML, and Markdown reports
-- Updated `DriftGuard.csproj` Product metadata
+- Updated `BicepGuard.csproj` Product metadata
 - Updated `README.md` title and branding
 - Internal namespaces remain `DriftGuard` for code compatibility
 
