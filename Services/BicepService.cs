@@ -6,44 +6,6 @@ namespace BicepGuard.Services;
 public class BicepService
 {
     private const int MaxRecursionDepth = 10; // we might want to expose this as an external configuration.
-    
-    private async Task<string> GetReferencedBicepFileAsync(string bicepparamFilePath)
-    {
-        try
-        {
-            // Read the bicepparam file to find the 'using' statement
-            var content = await File.ReadAllTextAsync(bicepparamFilePath);
-            var lines = content.Split('\n');
-            
-            foreach (var line in lines)
-            {
-                var trimmedLine = line.Trim();
-                if (trimmedLine.StartsWith("using "))
-                {
-                    // Extract the file path from the using statement
-                    var usingPart = trimmedLine.Substring(6).Trim(); // Remove "using "
-                    var filePath = usingPart.Trim('\'', '"'); // Remove quotes
-                    
-                    // If it's a relative path, make it relative to the bicepparam file
-                    if (!Path.IsPathRooted(filePath))
-                    {
-                        var bicepparamDir = Path.GetDirectoryName(bicepparamFilePath) ?? "";
-                        filePath = Path.GetFullPath(Path.Combine(bicepparamDir, filePath));
-                    }
-                    
-                    return filePath;
-                }
-            }
-            
-            throw new InvalidOperationException($"Could not find 'using' statement in bicepparam file: {bicepparamFilePath}");
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Error reading bicepparam file '{bicepparamFilePath}': {ex.Message}", ex);
-        }
-    }
-
-
 
     private JObject ResolveTemplateParameters(JObject armTemplate, JObject parametersJson)
     {
