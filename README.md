@@ -60,13 +60,13 @@ BicepGuard helps maintain **IaC compliance** by identifying these deviations qui
 
 ```bash
 # Pull the public image (no authentication needed!)
-docker pull mwhooo/driftguard
+docker pull mwhooo/bicepguard
 
 # Run with your Azure credentials
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard \
+  mwhooo/bicepguard \
   --bicep-file template.bicep \
   --resource-group myResourceGroup
 ```
@@ -87,13 +87,13 @@ docker run --rm \
 **Installation:**
 ```bash
 git clone <your-repo>
-cd DriftGuard
+cd bicepguard
 dotnet build
 ```
 
 ### Parameter File Approaches
 
-DriftGuard supports three ways to provide parameters to your Bicep templates:
+BicepGuard supports three ways to provide parameters to your Bicep templates:
 
 | Approach | Bicep File | Parameters | Use Case | Example File |
 |----------|-----------|-----------|----------|--------------|
@@ -114,7 +114,7 @@ Use this when your template has no parameters or they're all hardcoded.
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard \
+  mwhooo/bicepguard \
   --bicep-file template.bicep \
   --resource-group myResourceGroup
 ```
@@ -129,7 +129,7 @@ dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard \
+  mwhooo/bicepguard \
   --bicep-file template.bicep \
   --scope Subscription \
   --subscription <subscription-id> \
@@ -156,7 +156,7 @@ Use this when you have separate `.bicep` and `.json` parameter files. This appro
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard \
+  mwhooo/bicepguard \
   --bicep-file template.bicep \
   --parameters-file params.json \
   --resource-group myResourceGroup
@@ -175,7 +175,7 @@ dotnet run -- \
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard \
+  mwhooo/bicepguard \
   --bicep-file infra.bicep \
   --parameters-file prod-params.json \
   --scope Subscription \
@@ -204,7 +204,7 @@ Use this modern approach with `.bicepparam` files. Parameters are defined inline
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard \
+  mwhooo/bicepguard \
   --bicep-file template.bicepparam \
   --resource-group myResourceGroup
 ```
@@ -219,7 +219,7 @@ dotnet run -- --bicep-file template.bicepparam --resource-group myResourceGroup
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard \
+  mwhooo/bicepguard \
   --bicep-file infra.bicepparam \
   --scope Subscription \
   --subscription <subscription-id> \
@@ -244,7 +244,7 @@ dotnet run -- \
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard \
+  mwhooo/bicepguard \
   --bicep-file template.bicep \
   --resource-group myResourceGroup \
   --output Html
@@ -255,7 +255,7 @@ docker run --rm \
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard \
+  mwhooo/bicepguard \
   --bicep-file template.bicep \
   --resource-group myResourceGroup \
   --output Json
@@ -271,7 +271,7 @@ dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup --out
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard \
+  mwhooo/bicepguard \
   --bicep-file template.bicep \
   --resource-group myResourceGroup \
   --autofix
@@ -282,7 +282,7 @@ docker run --rm \
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard \
+  mwhooo/bicepguard \
   --bicep-file template.bicep \
   --resource-group myResourceGroup \
   --ignore-config custom-ignore.json
@@ -301,7 +301,7 @@ dotnet run -- \
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
-  mwhooo/driftguard \
+  mwhooo/bicepguard \
   --bicep-file template.bicep \
   --resource-group myResourceGroup \
   --output Json \
@@ -409,7 +409,7 @@ The detector identifies the exact array index (2) and shows the complete rule de
       Actual:   "8080"
 ```
 
-When properties within an existing rule are modified, DriftGuard shows the specific property path and the Expected/Actual values, making it clear exactly what changed.
+When properties within an existing rule are modified, BicepGuard shows the specific property path and the Expected/Actual values, making it clear exactly what changed.
 
 ### Scenario 3: Storage Account Tag Drift
 **Template Definition:**
@@ -464,7 +464,7 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-04-0
       Actual:   "missing in Azure"
 ```
 
-When a resource is defined in the template but missing in Azure, DriftGuard flags it with ❌ and shows the mismatch between the template definition and Azure reality. This is how DriftGuard detects deleted or never-deployed resources.
+When a resource is defined in the template but missing in Azure, BicepGuard flags it with ❌ and shows the mismatch between the template definition and Azure reality. This is how BicepGuard detects deleted or never-deployed resources.
 
 ### Scenario 5: Automatic Drift Remediation with --autofix
 **Situation:** Multiple resources have drifted from template (missing resource, modified tags, extra tags)
@@ -476,7 +476,7 @@ dotnet run -- --bicep-file template.bicepparam --resource-group myRG --autofix
 
 **Output:**
 ```
-🔍 AZURE DRIFTGUARD - CONFIGURATION DRIFT DETECTION REPORT
+🔍 AZURE BICEPGUARD - CONFIGURATION DRIFT DETECTION REPORT
 ============================================================
 📅 Detection Time: 2026-02-12 20:27:27 UTC
 📊 Summary: Configuration drift detected in 2 resource(s) with 4 property difference(s).
@@ -511,7 +511,7 @@ dotnet run -- --bicep-file template.bicepparam --resource-group myRG --autofix
 📦 Deployment Name: drift-autofix-20260212-202727
 ```
 
-When drift is detected and `--autofix` is used, DriftGuard shows the full drift report first, then automatically deploys the template with a timestamped deployment name for tracking. All drifted resources are restored to match the template definition.
+When drift is detected and `--autofix` is used, BicepGuard shows the full drift report first, then automatically deploys the template with a timestamped deployment name for tracking. All drifted resources are restored to match the template definition.
 
 ### Scenario 6: Conditional Deployment Support
 **Template Definition:**
@@ -826,7 +826,7 @@ Options:
 ## 🏛️ Architecture
 
 ```
-DriftGuard/
+BicepGuard/
 ├── Core/
 │   └── DriftDetector.cs          # Main orchestration logic with ignore integration
 ├── Models/
