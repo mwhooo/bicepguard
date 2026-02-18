@@ -10,7 +10,7 @@ public class AzureCliService {
             // Query all resources in the resource group
             using var process = new Process {
                 StartInfo = new ProcessStartInfo {
-                    FileName = GetAzureCLIPath(),
+                    FileName = AzureCliPathResolver.GetAzureCLIPath(),
                     Arguments = $"resource list --resource-group \"{resourceGroup}\" --output json",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -53,7 +53,7 @@ public class AzureCliService {
         try {
             using var process = new Process {
                 StartInfo = new ProcessStartInfo {
-                    FileName = GetAzureCLIPath(),
+                    FileName = AzureCliPathResolver.GetAzureCLIPath(),
                     Arguments = $"resource show --id \"{resourceId}\" --output json",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -155,10 +155,6 @@ public class AzureCliService {
         }
     }
 
-    private static string GetAzureCLIPath() {
-        return AzureCliPathResolver.GetAzureCLIPath();
-    }
-
     public async Task<DeploymentResult> DeployBicepTemplateAsync(
         string bicepFilePath,
         string? parametersFilePath,
@@ -189,7 +185,7 @@ public class AzureCliService {
             
             using var process = new Process {
                 StartInfo = new ProcessStartInfo {
-                    FileName = GetAzureCLIPath(),
+                    FileName = AzureCliPathResolver.GetAzureCLIPath(),
                     Arguments = arguments,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
