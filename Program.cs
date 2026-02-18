@@ -13,9 +13,9 @@ class Program
 {
     static async Task<int> Main(string[] args)
     {
-        // Build the root command with all options and handlers configured
-        // See CLI/DriftGuardCommand.BuildRootCommand() for full command setup
-        var rootCommand = DriftGuardCommand.BuildRootCommand();
+        // Instantiate the command handler and build the root command
+        var command = new DriftGuardCommand();
+        var rootCommand = command.BuildRootCommand();
         return await rootCommand.InvokeAsync(args);
     }
 }
