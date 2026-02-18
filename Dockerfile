@@ -52,5 +52,5 @@ CMD ["--help"]
 # Metadata
 LABEL org.opencontainers.image.title="DriftGuard" \
       org.opencontainers.image.description="Azure infrastructure drift detection and remediation tool" \
-      org.opencontainers.image.vendor="NL-AMS-PLATFORM-ENGINEER" \
-      org.opencontainers.image.source="https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard"
+      org.opencontainers.image.vendor="Mark Bakker" \
+      org.opencontainers.image.source="https://github.com/mwhooo/driftguard"
