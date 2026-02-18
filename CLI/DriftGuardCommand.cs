@@ -1,0 +1,248 @@
+using DriftGuard.Core;
+using DriftGuard.Models;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+
+namespace DriftGuard.CLI;
+
+/// <summary>
+/// Handles the main command execution for DriftGuard.
+/// </summary>
+public class DriftGuardCommand
+{
+    // Private option fields
+    private Option<FileInfo>? _bicepFileOption;
+    private Option<FileInfo?>? _parametersFileOption;
+    private Option<DeploymentScope>? _scopeOption;
+    private Option<string?>? _resourceGroupOption;
+    private Option<string?>? _subscriptionOption;
+    private Option<string?>? _locationOption;
+    private Option<OutputFormat>? _outputFormatOption;
+    private Option<bool>? _simpleOutputOption;
+    private Option<bool>? _autofixOption;
+    private Option<FileInfo?>? _ignoreConfigOption;
+    private Option<bool>? _showFilteredOption;
+
+    // Public properties for parsed values
+    public FileInfo? BicepFile { get; set; }
+    public FileInfo? ParametersFile { get; set; }
+    public DeploymentScope Scope { get; set; }
+    public string? ResourceGroup { get; set; }
+    public string? Subscription { get; set; }
+    public string? Location { get; set; }
+    public OutputFormat OutputFormat { get; set; }
+    public bool SimpleOutput { get; set; }
+    public bool Autofix { get; set; }
+    public FileInfo? IgnoreConfig { get; set; }
+    public bool ShowFiltered { get; set; }
+
+    /// <summary>
+    /// Builds the root command with all options configured.
+    /// </summary>
+    public RootCommand BuildRootCommand()
+    {
+        var rootCommand = new RootCommand("Azure DriftGuard - Configuration Drift Detector")
+        {
+            Description = "Detects configuration drift between Bicep/ARM templates and live Azure resources"
+        };
+
+        // Store options as instance fields for use in the handler
+        _bicepFileOption = CommandLineOptions.CreateBicepFileOption();
+        _parametersFileOption = CommandLineOptions.CreateParametersFileOption();
+        _scopeOption = CommandLineOptions.CreateScopeOption();
+        _resourceGroupOption = CommandLineOptions.CreateResourceGroupOption();
+        _subscriptionOption = CommandLineOptions.CreateSubscriptionOption();
+        _locationOption = CommandLineOptions.CreateLocationOption();
+        _outputFormatOption = CommandLineOptions.CreateOutputFormatOption();
+        _simpleOutputOption = CommandLineOptions.CreateSimpleOutputOption();
+        _autofixOption = CommandLineOptions.CreateAutofixOption();
+        _ignoreConfigOption = CommandLineOptions.CreateIgnoreConfigOption();
+        _showFilteredOption = CommandLineOptions.CreateShowFilteredOption();
+
+        rootCommand.Add(_bicepFileOption);
+        rootCommand.Add(_parametersFileOption);
+        rootCommand.Add(_scopeOption);
+        rootCommand.Add(_resourceGroupOption);
+        rootCommand.Add(_subscriptionOption);
+        rootCommand.Add(_locationOption);
+        rootCommand.Add(_outputFormatOption);
+        rootCommand.Add(_simpleOutputOption);
+        rootCommand.Add(_autofixOption);
+        rootCommand.Add(_ignoreConfigOption);
+        rootCommand.Add(_showFilteredOption);
+
+        // Set the handler - captures 'this' to access instance methods and properties
+        rootCommand.SetHandler(async (context) =>
+        {
+            await HandleCommandAsync(context);
+        });
+
+        return rootCommand;
+    }
+
+    /// <summary>
+    /// Handles the command execution logic.
+    /// </summary>
+    private async Task HandleCommandAsync(InvocationContext context)
+    {
+        // Extract all option values into properties
+        BicepFile = context.ParseResult.GetValueForOption(_bicepFileOption!)!;
+        ParametersFile = context.ParseResult.GetValueForOption(_parametersFileOption!);
+        Scope = context.ParseResult.GetValueForOption(_scopeOption!);
+        ResourceGroup = context.ParseResult.GetValueForOption(_resourceGroupOption!);
+        Subscription = context.ParseResult.GetValueForOption(_subscriptionOption!);
+        Location = context.ParseResult.GetValueForOption(_locationOption!);
+        OutputFormat = context.ParseResult.GetValueForOption(_outputFormatOption!);
+        SimpleOutput = context.ParseResult.GetValueForOption(_simpleOutputOption!);
+        Autofix = context.ParseResult.GetValueForOption(_autofixOption!);
+        IgnoreConfig = context.ParseResult.GetValueForOption(_ignoreConfigOption!);
+        ShowFiltered = context.ParseResult.GetValueForOption(_showFilteredOption!);
+
+        try
+        {
+            // Set up console encoding and simple output mode
+            Console.OutputEncoding = System.Text.Encoding.UTF8; // this supports emojis in the console output
+            Environment.SetEnvironmentVariable("SIMPLE_OUTPUT", SimpleOutput.ToString()); // set environment variable to indicate simple output mode for use in ConsoleOutput
+            Environment.SetEnvironmentVariable("SHOW_FILTERED", ShowFiltered.ToString()); // set environment variable to indicate whether to show filtered results
+
+            // Validate all inputs
+            if (!ValidateInputs())
+            {
+                Environment.Exit(1);
+                return;
+            }
+
+            // Display configuration
+            ConsoleOutput.WriteConfiguration(
+                BicepFile,
+                ParametersFile,
+                Scope,
+                ResourceGroup,
+                Subscription,
+                Location,
+                OutputFormat,
+                Autofix,
+                IgnoreConfig,
+                ShowFiltered,
+                SimpleOutput);
+
+            // Execute drift detection
+            var detector = new DriftDetector(IgnoreConfig?.FullName);
+            var result = await detector.DetectDriftAsync(
+                BicepFile,
+                ParametersFile,
+                Scope,
+                ResourceGroup,
+                Subscription,
+                Location,
+                OutputFormat);
+
+            // Handle results
+            await HandleDriftResultAsync(result, detector);
+        }
+        catch (InvalidOperationException)
+        {
+            // Validation errors already have detailed output from BicepService
+            Environment.Exit(1);
+        }
+        catch (Exception ex)
+        {
+            ConsoleOutput.WriteFatal(ex.Message, ex.InnerException, SimpleOutput);
+            ConsoleOutput.WriteTip("Ensure Azure CLI is installed and you're logged in with 'az login'", SimpleOutput);
+            Environment.Exit(1);
+        }
+    }
+
+    /// <summary>
+    /// Validates all input arguments.
+    /// </summary>
+    private bool ValidateInputs()
+    {
+        // Validate Bicep file
+        if (!BicepFile!.Exists) {
+            ConsoleOutput.WriteError($"Bicep file not found: {BicepFile.FullName}", SimpleOutput);
+            return false;
+        }
+
+        // Validate parameter configuration
+        var paramConfigValidation = InputValidator.ValidateBicepParamsSpecified(BicepFile, ParametersFile);
+        if (!paramConfigValidation.IsValid){
+            ConsoleOutput.WriteError(paramConfigValidation.ErrorMessage!, SimpleOutput);
+            return false;
+        }
+
+        // Validate parameters file if provided
+        var paramFileValidation = InputValidator.ValidateParametersFile(ParametersFile);
+        if (!paramFileValidation.IsValid)
+        {
+            ConsoleOutput.WriteError(paramFileValidation.ErrorMessage!, SimpleOutput);
+            return false;
+        }
+
+        // Validate scope-specific requirements
+        if (Scope == DeploymentScope.ResourceGroup)
+        {
+            var rgValidation = InputValidator.ValidateResourceGroupScope(ResourceGroup);
+            if (!rgValidation.IsValid)
+            {
+                ConsoleOutput.WriteError(rgValidation.ErrorMessage!, SimpleOutput);
+                return false;
+            }
+        }
+        else if (Scope == DeploymentScope.Subscription)
+        {
+            var subValidation = InputValidator.ValidateSubscriptionScope(Subscription, Location);
+            if (!subValidation.IsValid)
+            {
+                ConsoleOutput.WriteError(subValidation.ErrorMessage!, SimpleOutput);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Handles the drift detection result and autofix if requested.
+    /// </summary>
+    private async Task HandleDriftResultAsync(DriftDetectionResult result, DriftDetector detector)
+    {
+        if (result.HasDrift)
+        {
+            ConsoleOutput.WriteWarning("Configuration drift detected!", SimpleOutput);
+
+            if (Autofix)
+            {
+                ConsoleOutput.WriteAutofixAttempt(SimpleOutput);
+                var deploymentResult = await detector.DeployTemplateAsync(
+                    BicepFile!,
+                    ParametersFile,
+                    Scope,
+                    ResourceGroup,
+                    Subscription,
+                    Location);
+
+                if (deploymentResult.Success)
+                {
+                    ConsoleOutput.WriteAutofixSuccess(deploymentResult.DeploymentName, SimpleOutput);
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    ConsoleOutput.WriteAutofixFailure(deploymentResult.ErrorMessage ?? "Unknown error", SimpleOutput);
+                    Environment.Exit(1);
+                }
+            }
+            else
+            {
+                ConsoleOutput.WriteTip("Use --autofix to automatically deploy template and fix drift.", SimpleOutput);
+                Environment.Exit(1);
+            }
+        }
+        else
+        {
+            ConsoleOutput.WriteSuccess("No configuration drift detected.", SimpleOutput);
+            Environment.Exit(0);
+        }
+    }
+}

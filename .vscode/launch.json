@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch (DriftGuard)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build DriftGuard",
+            "program": "${workspaceFolder}/bin/Debug/net8.0/DriftGuard.dll",
+            "args": [
+                "--bicep-file",
+                "samples/main-template.bicepparam",
+                "--resource-group",
+                "dev",
+                "--output",
+                "Console"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}
+

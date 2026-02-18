@@ -2,7 +2,7 @@
 
 A sophisticated C# console application that detects configuration drift between Bicep/ARM templates and live Azure resources. Built for DevOps teams practicing Infrastructure as Code (IaC) to ensure deployed resources match their intended configuration.
 
-> 🔗 **Want to add drift detection to your Azure repos?** See our [Integration Guide](docs/INTEGRATION.md) for quick setup using reusable workflows.
+> 🔗 **Want to add drift detection to your Azure repos?** See the [Integration Guide](docs/INTEGRATION.md) for quick setup using reusable workflows.
 
 ## 🎯 Purpose
 
@@ -26,13 +26,6 @@ DriftGuard helps maintain **IaC compliance** by identifying these deviations qui
 - **Complex Object Handling**: Intelligent reporting for arrays and nested objects
 - **External Module Support**: Full support for Azure Container Registry modules (`br:` syntax) and Azure Verified Modules (AVM)
 
-### 🎨 **Type-Safe Bicep with User-Defined Types (UDTs)**
-- **Exported Types**: Each Bicep module exports its own configuration types with `@export()`
-- **Single Config Objects**: Clean module interface with one config parameter per module
-- **Full IntelliSense**: Complete type checking and autocomplete in VS Code
-- **DRY Architecture**: Types defined once in modules, imported where needed
-- **Compile-Time Validation**: Catch configuration errors before deployment
-
 ### 📊 **Clean, Human-Friendly Reporting**
 - **Suppressed Verbose Output**: Azure what-if output hidden, showing only formatted results
 - **Console**: Clean, colorized terminal output with emojis
@@ -46,13 +39,6 @@ DriftGuard helps maintain **IaC compliance** by identifying these deviations qui
 - **Smart Deployment**: Only deploys when actual drift is detected
 - **Safe Execution**: Provides detailed deployment feedback and error handling
 - **Deployment Tracking**: Generates unique deployment names with timestamps
-
-### 🎛️ **Modern Bicep Architecture**
-- **Modular Design**: Separate modules for each resource type in `bicep-modules/` directory
-- **Bicepparam Support**: Native `.bicepparam` file support for parameter management
-- **Union Types**: Type-safe SKU and configuration options using union types
-- **Optional Parameters**: Nullable fields with safe access operators and sensible defaults
-- **Parameter Merging**: Automatic merging of common parameters (location, tags) with config objects
 
 ### 🔇 **Intelligent Drift Filtering**
 - **Noise Suppression**: Advanced ignore system to filter out Azure platform behaviors and false positives
@@ -105,46 +91,156 @@ cd DriftGuard
 dotnet build
 ```
 
-### Basic Usage Examples
+### Parameter File Approaches
 
-#### Using Docker
+DriftGuard supports three ways to provide parameters to your Bicep templates:
+
+| Approach | Bicep File | Parameters | Use Case | Example File |
+|----------|-----------|-----------|----------|--------------|
+| **Plain Bicep** | `template.bicep` | None (no params in template) | Simple templates with hardcoded config | `template.bicep` |
+| **Bicep + JSON Params** | `template.bicep` | `--parameters-file params.json` | Templates with parameterized config | `template.bicep` + `params.json` |
+| **Bicepparam File** | `template.bicepparam` | Built-in (via `using` statement) | Modern Bicep with self-contained params | `template.bicepparam` |
+
+**Note:** You cannot use both `.bicepparam` file and `--parameters-file` together — choose one approach.
+
+### Usage by Deployment Type
+
+#### 1️⃣ Plain Bicep Template (No Parameters)
+
+Use this when your template has no parameters or they're all hardcoded.
+
+**Docker (Resource-Group Scope):**
 ```bash
-# Detect drift using a Bicep template (resource-group scope)
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
   mwhooo/driftguard \
   --bicep-file template.bicep \
   --resource-group myResourceGroup
+```
 
-# Detect drift using a Bicepparam file
+**Native Binary (Resource-Group Scope):**
+```bash
+dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup
+```
+
+**Docker (Subscription Scope):**
+```bash
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --scope Subscription \
+  --subscription <subscription-id> \
+  --location westeurope
+```
+
+**Native Binary (Subscription Scope):**
+```bash
+dotnet run -- \
+  --bicep-file template.bicep \
+  --scope Subscription \
+  --subscription <subscription-id> \
+  --location westeurope
+```
+
+---
+
+#### 2️⃣ Bicep + JSON Parameters File
+
+Use this when you have separate `.bicep` and `.json` parameter files. This approach is useful for environment-specific parameters.
+
+**Docker (Resource-Group Scope):**
+```bash
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --parameters-file params.json \
+  --resource-group myResourceGroup
+```
+
+**Native Binary (Resource-Group Scope):**
+```bash
+dotnet run -- \
+  --bicep-file template.bicep \
+  --parameters-file params.json \
+  --resource-group myResourceGroup
+```
+
+**Docker (Subscription Scope with Different Environment):**
+```bash
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file infra.bicep \
+  --parameters-file prod-params.json \
+  --scope Subscription \
+  --subscription <subscription-id> \
+  --location westeurope
+```
+
+**Native Binary (Subscription Scope):**
+```bash
+dotnet run -- \
+  --bicep-file infra.bicep \
+  --parameters-file prod-params.json \
+  --scope Subscription \
+  --subscription <subscription-id> \
+  --location westeurope
+```
+
+---
+
+#### 3️⃣ Bicepparam File (Self-Contained)
+
+Use this modern approach with `.bicepparam` files. Parameters are defined inline with a `using` reference to the template, making it self-documenting.
+
+**Docker (Resource-Group Scope):**
+```bash
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
   mwhooo/driftguard \
   --bicep-file template.bicepparam \
   --resource-group myResourceGroup
+```
 
-# Detect drift for subscription-scope deployments
+**Native Binary (Resource-Group Scope):**
+```bash
+dotnet run -- --bicep-file template.bicepparam --resource-group myResourceGroup
+```
+
+**Docker (Subscription Scope):**
+```bash
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
   mwhooo/driftguard \
-  --bicep-file infra.bicep \
+  --bicep-file infra.bicepparam \
   --scope Subscription \
   --subscription <subscription-id> \
   --location westeurope
+```
 
-# Automatically fix detected drift
-docker run --rm \
-  -v ~/.azure:/root/.azure \
-  -v $(pwd):/workspace \
-  mwhooo/driftguard \
-  --bicep-file template.bicepparam \
-  --resource-group myResourceGroup \
-  --autofix
+**Native Binary (Subscription Scope):**
+```bash
+dotnet run -- \
+  --bicep-file infra.bicepparam \
+  --scope Subscription \
+  --subscription <subscription-id> \
+  --location westeurope
+```
 
-# Generate HTML report (saved to your mounted workspace)
+---
+
+### Output Formats & Advanced Options
+
+#### Generate HTML Reports
+```bash
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
@@ -154,15 +250,35 @@ docker run --rm \
   --output Html
 ```
 
-#### Using Native Binary
+#### JSON Output for CI/CD Automation
 ```bash
-# Detect drift using a Bicep template
-dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup \
+  --output Json
+```
 
-# Generate JSON report for automation
+**Native Binary:**
+```bash
 dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup --output Json
+```
 
-# Use custom ignore configuration to suppress Azure platform noise
+#### Automatically Fix Detected Drift
+```bash
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup \
+  --autofix
+```
+
+#### Use Custom Ignore Configuration
+```bash
 docker run --rm \
   -v ~/.azure:/root/.azure \
   -v $(pwd):/workspace \
@@ -172,9 +288,24 @@ docker run --rm \
   --ignore-config custom-ignore.json
 ```
 
-**Native Binary Alternative:**
+**Native Binary:**
 ```bash
-dotnet run -- --bicep-file template.bicep --resource-group myResourceGroup --ignore-config custom-ignore.json
+dotnet run -- \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup \
+  --ignore-config custom-ignore.json
+```
+
+#### CI/CD Mode (JSON + Simple ASCII Output)
+```bash
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/driftguard \
+  --bicep-file template.bicep \
+  --resource-group myResourceGroup \
+  --output Json \
+  --simple-output
 ```
 
 > 📖 **Need to configure drift ignore rules?** See our comprehensive [Drift Ignore Configuration Guide](docs/DRIFT-IGNORE.md) with examples for common Azure services and best practices.
@@ -207,7 +338,7 @@ subnets: [
 **Template Definition:**
 ```bicep
 resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-04-01' = {
-  name: 'myapp-nsg'
+  name: 'drifttest-nsg'
   properties: {
     securityRules: [
       {
@@ -218,20 +349,67 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-04-0
         protocol: 'Tcp'
         sourcePortRange: '*'
         destinationPortRange: '80'
+        sourceAddressPrefix: '*'
+        destinationAddressPrefix: '*'
+      }
+      {
+        name: 'AllowHTTPS'
+        priority: 110
+        access: 'Allow'
+        direction: 'Inbound'
+        protocol: 'Tcp'
+        sourcePortRange: '*'
+        destinationPortRange: '443'
+        sourceAddressPrefix: '*'
+        destinationAddressPrefix: '*'
       }
     ]
   }
 }
 ```
 
-**Manual Change in Portal:** Added SSH rule with priority 200
+**Manual Change in Portal:** Added SSH rule (AllowSSH) with priority 120
 
 **Drift Detection Result:**
 ```
-🔄 properties.securityRules (Modified)
-   Expected: "configured in template"
-   Actual:   "differs in Azure (complex object/array)"
+🔴 Microsoft.Network/networkSecurityGroups - drifttest-nsg
+   Property Drifts: 1
+
+   ➕ properties.securityRules.2 (Extra)
+      Expected: not set
+      Actual:  
+        {
+          "name": "AllowSSH",
+          "properties": {
+            "access": "Allow",
+            "destinationAddressPrefix": "*",
+            "destinationPortRange": "22",
+            "direction": "Inbound",
+            "priority": 120,
+            "protocol": "Tcp",
+            "sourceAddressPrefix": "*",
+            "sourcePortRange": "*"
+          }
+        }
 ```
+
+The detector identifies the exact array index (2) and shows the complete rule definition, making it easy to see what was added or modified.
+
+**Scenario 2b: Modified Security Rule Property**
+
+**Change in Portal:** Modify existing AllowHTTP rule's destination port from 80 to 8080
+
+**Drift Detection Result:**
+```
+🔴 Microsoft.Network/networkSecurityGroups - drifttest-nsg
+   Property Drifts: 1
+
+   🔄 properties.securityRules.0.properties.destinationPortRange (Modified)
+      Expected: "80"
+      Actual:   "8080"
+```
+
+When properties within an existing rule are modified, DriftGuard shows the specific property path and the Expected/Actual values, making it clear exactly what changed.
 
 ### Scenario 3: Storage Account Tag Drift
 **Template Definition:**
@@ -249,17 +427,20 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
 
 **Drift Detection Result:**
 ```
-🔄 tags.Environment (Modified)
-   Expected: "test"
-   Actual:   "production"
+� Microsoft.Storage/storageAccounts - drifttestsay6kt676i
+   Property Drifts: 3
 
-❓ tags.ManualTag (Added)
-   Expected: "not set"
-   Actual:   "test"
+   🔄 tags.Environment (Modified)
+      Expected: "test"
+      Actual:   "production"
 
-❌ tags.ResourceType (Missing)
-   Expected: "Infrastructure"
-   Actual:   "removed"
+   ➕ tags.ManualTag (Extra)
+      Expected: not set
+      Actual:   "test"
+
+   ❌ tags.ResourceType (Missing)
+      Expected: "Infrastructure"
+      Actual:   not set
 ```
 
 ### Scenario 4: Missing Resource Detection
@@ -271,56 +452,66 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-04-0
 }
 ```
 
-**Azure Reality:** NSG was never deployed or was deleted
+**Azure Reality:** The NSG resource defined in the template doesn't exist in Azure (was deleted or never deployed)
 
 **Drift Detection Result:**
 ```
-❌ resource (Missing)
-   Expected: "exists"
-   Actual:   "missing"
+🔴 Microsoft.Network/networkSecurityGroups - drifttest-nsg
+   Property Drifts: 1
+
+   ❌ resource (Missing)
+      Expected: "defined in template"
+      Actual:   "missing in Azure"
 ```
 
-Note: Internally the detector interprets Azure what-if `+` (create) lines as a Missing drift when the resource is defined in the template but does not exist in the target Azure environment. This makes deleted or never-deployed resources visible in drift reports (see PR #71).
+When a resource is defined in the template but missing in Azure, DriftGuard flags it with ❌ and shows the mismatch between the template definition and Azure reality. This is how DriftGuard detects deleted or never-deployed resources.
 
 ### Scenario 5: Automatic Drift Remediation with --autofix
-**Template Definition:**
-```bicep
-resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-04-01' = {
-  name: '${applicationName}-nsg'
-  properties: {
-    securityRules: [
-      {
-        name: 'AllowHTTP'
-        properties: {
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '80'
-          access: 'Allow'
-          direction: 'Inbound'
-          priority: 100
-        }
-      }
-    ]
-  }
-}
-```
+**Situation:** Multiple resources have drifted from template (missing resource, modified tags, extra tags)
 
-**Manual Change:** Added SSH rule via Azure Portal
-
-**Drift Detection with Autofix:**
+**Command:**
 ```bash
-dotnet run -- --bicep-file template.bicep --resource-group myRG --autofix
+dotnet run -- --bicep-file template.bicepparam --resource-group myRG --autofix
 ```
 
 **Output:**
 ```
+🔍 AZURE DRIFTGUARD - CONFIGURATION DRIFT DETECTION REPORT
+============================================================
+📅 Detection Time: 2026-02-12 20:27:27 UTC
+📊 Summary: Configuration drift detected in 2 resource(s) with 4 property difference(s).
+
+❌ Configuration drift detected in 2 resource(s):
+
+🔴 Microsoft.Network/networkSecurityGroups - myapp-nsg
+   Property Drifts: 1
+
+   ❌ resource (Missing)
+      Expected: "defined in template"
+      Actual:   "missing in Azure"
+
+🔴 Microsoft.Storage/storageAccounts - mystorageacct
+   Property Drifts: 2
+
+   🔄 tags.Environment (Modified)
+      Expected: "test"
+      Actual:   "production"
+
+   ➕ tags.ManualTag (Extra)
+      Expected: not set
+      Actual:   "added-manually"
+
+============================================================
 ❌ Configuration drift detected!
 🔧 Attempting to fix drift by deploying template...
 🚀 Deploying Bicep template to resource group: myRG
+📄 Template file: /path/to/template.bicepparam
 ✅ Deployment completed successfully!
 ✅ Drift has been automatically fixed!
-📦 Deployment Name: drift-autofix-20251113-150351
+📦 Deployment Name: drift-autofix-20260212-202727
 ```
+
+When drift is detected and `--autofix` is used, DriftGuard shows the full drift report first, then automatically deploys the template with a timestamped deployment name for tracking. All drifted resources are restored to match the template definition.
 
 ### Scenario 6: Conditional Deployment Support
 **Template Definition:**
@@ -336,7 +527,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = if (deployKeyVault) {
 ## 🔗 External Module Support
 
 ### Azure Container Registry Integration
-The tool provides comprehensive support for external Bicep modules from Azure Container Registry and Azure Verified Modules (AVM):
+The tool provides support for external Bicep modules from Azure Container Registry and Azure Verified Modules (AVM):
 
 #### Supported Module Syntax
 ```bicep
@@ -416,7 +607,7 @@ resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-11-0
 
 ## 🔇 Drift Ignore Configuration
 
-The drift detection system includes a comprehensive ignore mechanism to suppress noise caused by Azure platform behaviors beyond your control.
+The drift detection system includes an ignore mechanism to suppress noise caused by Azure platform behaviors beyond your control.
 
 ### Purpose
 The ignore functionality is specifically designed to filter out "noise" from:
@@ -495,6 +686,8 @@ dotnet run -- --bicep-file template.bicep --resource-group myRG --ignore-config 
 - **Resource Types**: Support wildcards like `"Microsoft.ServiceBus/*"` for all Service Bus resource types
 - **Global vs Resource-Specific**: Global patterns apply to all resources, resource-specific patterns only apply to matching resource types
 
+**Wildcard Support Tested**: Wildcard patterns are fully functional. Example: the pattern `"tags.*"` successfully suppressed 2 tag drifts in testing, with the output confirming `"No configuration drift detected after filtering 2 ignored drift(s)."` This validates both the wildcard syntax and the filtering mechanism work as documented.
+
 ### Real-World Example
 Before implementing ignore patterns:
 ```
@@ -522,7 +715,7 @@ After implementing ignore patterns:
 ## 🏗️ Advanced Features
 
 ### Azure What-If Integration
-The drift detector leverages Azure's native what-if functionality for authoritative drift detection:
+The drift detector leverages Azure's native what-if functionality for drift detection:
 
 ```bash
 # Behind the scenes, the tool runs:
@@ -530,68 +723,10 @@ az deployment group what-if --resource-group dev --template-file samples/main-te
 ```
 
 This provides:
-- ✅ **Azure-Native Comparison**: Uses Azure's deployment engine for authoritative drift detection
+- ✅ **Azure-Native Comparison**: Uses Azure's deployment engine for drift detection
 - ✅ **Intelligent Noise Suppression**: Filters Azure platform behaviors with configurable ignore patterns
 - ✅ **Comprehensive Analysis**: Detects most configuration changes across resource types
 - ✅ **Clean Output**: Verbose what-if output suppressed, showing only formatted drift results
-
-### Type-Safe Bicep Modules
-Modern Bicep architecture with exported types:
-
-```bicep
-// bicep-modules/storage-account.bicep
-@export()
-type StorageAccountSku = 'Standard_LRS' | 'Standard_GRS' | 'Premium_LRS'
-
-@export()
-type StorageAccountConfig = {
-  storageAccountName: string
-  location: string?
-  skuName: StorageAccountSku?
-  // ... more fields
-}
-
-param storageAccountConfig StorageAccountConfig
-
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
-  name: storageAccountConfig.storageAccountName
-  location: storageAccountConfig.?location ?? resourceGroup().location
-  // ...
-}
-```
-
-```bicep
-// main-template.bicep
-import {StorageAccountConfig} from 'bicep-modules/storage-account.bicep'
-
-param storageConfig StorageAccountConfig
-
-module storageModule 'bicep-modules/storage-account.bicep' = {
-  params: {
-    storageAccountConfig: union(storageConfig, {location: location, tags: tags})
-  }
-}
-```
-
-### Bicepparam File Support
-Clean parameter management with `.bicepparam` files:
-
-```bicep
-// main-template.bicepparam
-using 'main-template.bicep'
-
-param storageConfig = {
-  storageAccountName: 'mystorageacct'
-  skuName: 'Standard_LRS'
-  kind: 'StorageV2'
-  minimumTlsVersion: 'TLS1_2'
-}
-
-param tags = {
-  Environment: 'production'
-  Application: 'myapp'
-}
-```
 
 ## 🎨 Sample Output
 
