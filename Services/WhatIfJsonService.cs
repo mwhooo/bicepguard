@@ -342,7 +342,7 @@ public class WhatIfJsonService
             // Container nodes are:
             // 1. Array type changes (the array itself has changes, real changes are in children)
             // 2. Modify type changes with children and null before/after (intermediate path segments like "0", "5")
-            bool isContainerNode = hasChildren && 
+            var isContainerNode = hasChildren && 
                                    (propertyChangeType == "Array" || 
                                     (string.IsNullOrEmpty(before) && string.IsNullOrEmpty(after)));
             
@@ -415,7 +415,7 @@ public class WhatIfJsonService
             var after = GetPropertyValue(child, "after");
 
             // Check if this has children
-            bool hasNestedChildren = child.TryGetProperty("children", out var nestedChildren) && 
+            var hasNestedChildren = child.TryGetProperty("children", out var nestedChildren) && 
                                      nestedChildren.ValueKind == JsonValueKind.Array && 
                                      nestedChildren.GetArrayLength() > 0;
 
@@ -423,7 +423,7 @@ public class WhatIfJsonService
             // Container nodes are:
             // 1. Array type changes (the array itself has changes, real changes are in children)
             // 2. Modify type changes with children and null before/after (intermediate path segments like "0", "5")
-            bool isContainerNode = hasNestedChildren && 
+            var isContainerNode = hasNestedChildren && 
                                    (propertyChangeType == "Array" || 
                                     (string.IsNullOrEmpty(before) && string.IsNullOrEmpty(after)));
             
@@ -475,7 +475,7 @@ public class WhatIfJsonService
         }
     }
 
-    private string GetPropertyValue(JsonElement element, string propertyName)
+    private static string GetPropertyValue(JsonElement element, string propertyName)
     {
         if (!element.TryGetProperty(propertyName, out var prop))
         {
