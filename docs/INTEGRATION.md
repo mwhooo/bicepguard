@@ -1,4 +1,4 @@
-# 🔗 DriftGuard Integration Guide
+# 🔗 BicepGuard Integration Guide
 
 This guide shows how to integrate DriftGuard into your existing Azure infrastructure repositories to enable automated drift detection.
 

@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using Xunit;
 using FluentAssertions;
-using DriftGuard.CLI;
+using BicepGuard.CLI;
 
-namespace DriftGuard.Tests.CLI;
+namespace BicepGuard.Tests.CLI;
 
 public class InputValidatorTests
 {

@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Newtonsoft.Json.Linq;
 
-namespace DriftGuard.Services;
+namespace BicepGuard.Services;
 
 public class BicepService
 {

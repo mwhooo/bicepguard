@@ -1,4 +1,4 @@
-# Multi-stage build for DriftGuard
+# Multi-stage build for BicepGuard
 # Stage 1: Build the application
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
@@ -17,7 +17,7 @@ RUN dotnet restore "DriftGuard.csproj"
 COPY . .
 
 # Build and publish with version
-RUN dotnet publish "DriftGuard.csproj" -c Release -o /app/publish --no-restore -p:Version=${VERSION}
+RUN dotnet publish "BicepGuard.csproj" -c Release -o /app/publish --no-restore -p:Version=${VERSION}
 
 # Stage 2: Runtime image with Azure CLI and Bicep
 FROM mcr.microsoft.com/azure-cli:latest
@@ -25,8 +25,8 @@ FROM mcr.microsoft.com/azure-cli:latest
 # Install Bicep CLI
 RUN az bicep install
 
-# Copy the published application from build stage to /opt/driftguard
-WORKDIR /opt/driftguard
+# Copy the published application from build stage to /opt/bicepguard
+WORKDIR /opt/bicepguard
 COPY --from=build /app/publish .
 
 # Set working directory to /workspace for user files
@@ -41,10 +41,10 @@ RUN tdnf install -y dotnet-runtime-8.0 icu \
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
     LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
-    PATH="/opt/driftguard:${PATH}"
+    PATH="/opt/bicepguard:${PATH}"
 
-# Set the entrypoint to DriftGuard
-ENTRYPOINT ["dotnet", "/opt/driftguard/DriftGuard.dll"]
+# Set the entrypoint to BicepGuard
+ENTRYPOINT ["dotnet", "/opt/bicepguard/BicepGuard.dll"]
 
 # Default help command if no args provided
 CMD ["--help"]

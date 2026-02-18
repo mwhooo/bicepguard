@@ -1,7 +1,7 @@
 using DriftGuard.Models;
 using System.CommandLine;
 
-namespace DriftGuard.CLI;
+namespace BicepGuard.CLI;
 
 /// <summary>
 /// Defines all command-line options for DriftGuard.

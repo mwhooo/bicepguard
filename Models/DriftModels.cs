@@ -1,4 +1,4 @@
-namespace DriftGuard.Models;
+namespace BicepGuard.Models;
 
 public enum OutputFormat
 {

@@ -2,7 +2,7 @@ using DriftGuard.Models;
 using Newtonsoft.Json.Linq;
 using JsonDiffPatchDotNet;
 
-namespace DriftGuard.Services;
+namespace BicepGuard.Services;
 
 public class ComparisonService
 {

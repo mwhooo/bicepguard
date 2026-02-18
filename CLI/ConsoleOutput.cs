@@ -1,7 +1,7 @@
 using DriftGuard.Models;
 using System.Reflection;
 
-namespace DriftGuard.CLI;
+namespace BicepGuard.CLI;
 
 /// <summary>
 /// Handles console output with support for both Unicode and ASCII modes.

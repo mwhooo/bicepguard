@@ -1,6 +1,6 @@
 # Drift Ignore Configuration
 
-DriftGuard includes a sophisticated ignore system to suppress false positive drift detections caused by Azure platform behaviors, managed properties, and other expected variations.
+BicepGuard includes a sophisticated ignore system to suppress false positive drift detections caused by Azure platform behaviors, managed properties, and other expected variations.
 
 ## Overview
 
@@ -256,7 +256,7 @@ Periodically review your ignore rules to ensure they're still relevant:
 
 ### Debug Ignore Rules
 
-DriftGuard shows which ignores are being applied:
+BicepGuard shows which ignores are being applied:
 
 ```
 🔇 Ignoring drift: Microsoft.ServiceBus/namespaces/queues/myqueue - properties.autoDeleteOnIdle
@@ -308,7 +308,7 @@ Conditions use AND logic - all must match:
 
 ## File Location Priority
 
-DriftGuard searches for ignore configuration in this order:
+BicepGuard searches for ignore configuration in this order:
 
 1. Path specified by `--ignore-config` parameter
 2. `drift-ignore.json` in current working directory

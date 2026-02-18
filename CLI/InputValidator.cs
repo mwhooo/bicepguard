@@ -1,4 +1,4 @@
-namespace DriftGuard.CLI;
+namespace BicepGuard.CLI;
 
 /// <summary>
 /// Validates command-line inputs and arguments.

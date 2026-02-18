@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace DriftGuard.Services;
+namespace BicepGuard.Services;
 
 /// <summary>
 /// Provides cross-platform Azure CLI path resolution.
