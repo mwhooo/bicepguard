@@ -567,21 +567,24 @@ public class WhatIfJsonService
         return ("Unknown", resourceId);
     }
 
+    // here we start seaching for the using statement in the bicepparam file, 
+    // so we can extract the bicep file belonging to the bicepparam
     private async Task<string> GetReferencedBicepFileAsync(string bicepparamFilePath)
     {
+        // read the whole file and split lines by \n
         var content = await File.ReadAllTextAsync(bicepparamFilePath);
         var lines = content.Split('\n');
         
         foreach (var line in lines)
         {
-            var trimmed = line.Trim();
+            var trimmed = line.Trim(); // trim in case someone indented the using statement.
             if (trimmed.StartsWith("using"))
             {
                 // Extract the file path from: using 'file.bicep' or using './file.bicep'
                 var match = System.Text.RegularExpressions.Regex.Match(trimmed, @"using\s+'([^']+)'");
                 if (match.Success)
                 {
-                    var referencedFile = match.Groups[1].Value;
+                    var referencedFile = match.Groups[1].Value; // here we get the filename of the bicepfile
                     var directory = Path.GetDirectoryName(Path.GetFullPath(bicepparamFilePath)) ?? "";
                     var fullPath = Path.GetFullPath(Path.Combine(directory, referencedFile));
                     
