@@ -66,7 +66,7 @@ public class WhatIfJsonService
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = GetAzureCLIPath(),
+                    FileName = AzureCliPathResolver.GetAzureCLIPath(),
                     Arguments = argumentsString,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -396,7 +396,7 @@ public class WhatIfJsonService
         }
     }
 
-    private void ParseNestedPropertyChanges(JsonElement children, ResourceDrift drift, string parentPath)
+    private static void ParseNestedPropertyChanges(JsonElement children, ResourceDrift drift, string parentPath)
     {
         foreach (var child in children.EnumerateArray())
         {
@@ -495,7 +495,7 @@ public class WhatIfJsonService
         };
     }
 
-    private (string resourceType, string resourceName) ParseResourceId(string resourceId)
+    private static (string resourceType, string resourceName) ParseResourceId(string resourceId)
     {
         if (string.IsNullOrEmpty(resourceId))
         {
@@ -569,7 +569,7 @@ public class WhatIfJsonService
 
     // here we start seaching for the using statement in the bicepparam file, 
     // so we can extract the bicep file belonging to the bicepparam
-    private async Task<string> GetReferencedBicepFileAsync(string bicepparamFilePath)
+    private static async Task<string> GetReferencedBicepFileAsync(string bicepparamFilePath)
     {
         // read the whole file and split lines by \n
         var content = await File.ReadAllTextAsync(bicepparamFilePath);
@@ -616,8 +616,5 @@ public class WhatIfJsonService
         throw new InvalidOperationException($"Could not find 'using' statement in {bicepparamFilePath}");
     }
 
-    private string GetAzureCLIPath()
-    {
-        return AzureCliPathResolver.GetAzureCLIPath();
-    }
+
 }
