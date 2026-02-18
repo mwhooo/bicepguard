@@ -1,6 +1,6 @@
 # Documentation
 
-This directory contains comprehensive documentation for BicepGuard.
+This directory contains documentation for BicepGuard.
 
 ## Available Documentation
 

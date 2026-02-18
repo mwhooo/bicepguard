@@ -116,7 +116,7 @@ This release improves drift detection robustness by handling unknown resource ty
 ## Version 3.3.0 - External Bicep Modules & Azure Verified Modules (AVM) Support (2025-11-20)
 
 ### 🎯 Summary
-This major release introduces comprehensive support for external Bicep modules from Azure Container Registry and Azure Verified Modules (AVM), with intelligent noise suppression for clean drift reporting in enterprise environments.
+This major release introduces support for external Bicep modules from Azure Container Registry and Azure Verified Modules (AVM), with intelligent noise suppression for clean drift reporting in enterprise environments.
 
 ### ✨ Major New Features
 
@@ -133,7 +133,7 @@ This major release introduces comprehensive support for external Bicep modules f
 - **Parameter File Support**: Enhanced support for `.bicepparam` files with external modules
 
 #### 🔇 Azure Verified Modules (AVM) Noise Suppression
-- **Intelligent Filtering**: Comprehensive ignore patterns for AVM-specific configurations
+- **Intelligent Filtering**: Ignore patterns for AVM-specific configurations
 - **Storage Account Compliance**: Filters AVM compliance properties (`customDomain`, retention policies)
 - **Service Bus Tier Handling**: Ignores premium properties in Basic tier deployments  
 - **Platform Behavior**: Suppresses Azure-managed properties (`ddosSettings`, timestamps)
@@ -145,7 +145,7 @@ This major release introduces comprehensive support for external Bicep modules f
 - **Consistent Reporting**: Same drift detection quality across module types
 - **Production Ready**: Validated with real enterprise scenarios
 
-### 🧪 Comprehensive Testing
+### 🧪 Testing
 - ✅ External module resolution via what-if
 - ✅ AVM noise pattern recognition and suppression  
 - ✅ Mixed template processing (external + direct resources)
@@ -247,7 +247,7 @@ This release introduces automatic drift remediation capabilities, allowing the t
 - **--autofix Flag**: New command-line option to enable automatic template deployment when drift is detected
 - **Smart Deployment Logic**: Only deploys when actual drift exists - no unnecessary deployments
 - **Deployment Tracking**: Generates unique deployment names with timestamps for audit trails
-- **Comprehensive Error Handling**: Detailed feedback on deployment success or failure
+- **Error Handling**: Detailed feedback on deployment success or failure
 
 #### 🎛️ Enhanced User Experience
 - **--simple-output Flag**: ASCII-only output mode perfect for CI/CD environments
@@ -343,7 +343,7 @@ This release represents a major improvement in drift detection accuracy, elimina
 
 ### 🧪 Testing Enhancements
 
-#### Comprehensive Validation
+#### Validation
 - **Real Azure Resource Testing**: Validated against actual deployed resources
 - **Multiple Resource Types**: Tested with VNets, Storage Accounts, NSGs, App Service Plans, Log Analytics
 - **Various Drift Scenarios**: Network changes, security modifications, tag drift, SKU changes
@@ -383,7 +383,7 @@ No migration required - existing Bicep templates and command-line usage remain u
 ### 🤝 Contributors
 - Enhanced comparison algorithms
 - Improved error handling and user experience
-- Comprehensive testing with real Azure environments
+- Testing with real Azure environments
 
 ### 🔮 What's Next (v2.2.0)
 - Support for more Azure resource types
