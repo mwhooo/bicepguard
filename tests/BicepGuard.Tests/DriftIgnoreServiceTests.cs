@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using Xunit;
 using FluentAssertions;
-using DriftGuard.Models;
-using DriftGuard.Services;
+using BicepGuard.Models;
+using BicepGuard.Services;
 
-namespace DriftGuard.Tests.Services;
+namespace BicepGuard.Tests.Services;
 
 public class DriftIgnoreServiceTests
 {

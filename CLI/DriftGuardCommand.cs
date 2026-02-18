@@ -1,14 +1,14 @@
-using DriftGuard.Core;
-using DriftGuard.Models;
+using BicepGuard.Core;
+using BicepGuard.Models;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 
-namespace DriftGuard.CLI;
+namespace BicepGuard.CLI;
 
 /// <summary>
-/// Handles the main command execution for DriftGuard.
+/// Handles the main command execution for BicepGuard.
 /// </summary>
-public class DriftGuardCommand
+public class BicepGuardCommand
 {
     // Private option fields
     private Option<FileInfo>? _bicepFileOption;
@@ -41,7 +41,7 @@ public class DriftGuardCommand
     /// </summary>
     public RootCommand BuildRootCommand()
     {
-        var rootCommand = new RootCommand("Azure DriftGuard - Configuration Drift Detector")
+        var rootCommand = new RootCommand("Azure BicepGuard - Configuration Drift Detector")
         {
             Description = "Detects configuration drift between Bicep/ARM templates and live Azure resources"
         };

@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Text.Json;
-using DriftGuard.Models;
+using BicepGuard.Models;
 
-namespace DriftGuard.Services;
+namespace BicepGuard.Services;
 
 /// <summary>
 /// Service to parse what-if JSON output for drift detection.

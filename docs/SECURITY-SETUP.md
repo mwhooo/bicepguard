@@ -1,6 +1,6 @@
 # Security Setup Guide
 
-This guide explains how to enable GitHub's security features for the DriftGuard project.
+This guide explains how to enable GitHub's security features for the BicepGuard project.
 
 ## 🛡️ GitHub Advanced Security for Private Repositories
 

@@ -1,8 +1,8 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using DriftGuard.Models;
+using BicepGuard.Models;
 
-namespace DriftGuard.Services;
+namespace BicepGuard.Services;
 
 public class DriftIgnoreService
 {

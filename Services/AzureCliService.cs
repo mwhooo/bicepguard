@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using System.Text.Json;
-using DriftGuard.Models;
+using BicepGuard.Models;
 using Newtonsoft.Json.Linq;
 
-namespace DriftGuard.Services;
+namespace BicepGuard.Services;
 
 public class AzureCliService
 {

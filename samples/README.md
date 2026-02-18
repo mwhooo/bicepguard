@@ -1,6 +1,6 @@
 # 📋 Sample Bicep Templates
 
-This directory contains example Bicep templates and parameter files for testing and demonstrating DriftGuard.
+This directory contains example Bicep templates and parameter files for testing and demonstrating BicepGuard.
 
 ## 📁 Contents
 

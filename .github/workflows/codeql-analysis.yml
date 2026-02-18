@@ -40,10 +40,10 @@ jobs:
         queries: security-extended,security-and-quality
 
     - name: 📦 Restore dependencies
-      run: dotnet restore DriftGuard.csproj
+      run: dotnet restore BicepGuard.csproj
 
     - name: 🔧 Build project
-      run: dotnet build DriftGuard.csproj --configuration Release --no-restore
+      run: dotnet build BicepGuard.csproj --configuration Release --no-restore
 
     - name: 🔍 Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4

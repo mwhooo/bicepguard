@@ -1,12 +1,12 @@
 # GitHub Actions Scripts
 
-This directory contains utility scripts used by the GitHub Actions workflows for DriftGuard.
+This directory contains utility scripts used by the GitHub Actions workflows for BicepGuard.
 
 ## Scripts
 
 ### `check-drift.sh`
 
-**Purpose**: Executes DriftGuard and extracts JSON drift reports
+**Purpose**: Executes BicepGuard and extracts JSON drift reports
 
 **Usage**:
 ```bash

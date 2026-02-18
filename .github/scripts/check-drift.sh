@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# DriftGuard Detection Script
+# BicepGuard Detection Script
 # This script runs the drift detector and extracts the JSON report
 
 set -e  # Exit on any error
@@ -10,7 +10,7 @@ RESOURCE_GROUP="$2"
 OUTPUT_FILE="${3:-drift-report.json}"
 IGNORE_CONFIG="$4"
 
-echo "🔍 Running DriftGuard..."
+echo "🔍 Running BicepGuard..."
 echo "📄 Template: $TEMPLATE_FILE"
 echo "🏗️  Resource Group: $RESOURCE_GROUP"
 echo "📊 Output File: $OUTPUT_FILE"
@@ -25,8 +25,8 @@ if [ -n "$IGNORE_CONFIG" ] && [ -f "$IGNORE_CONFIG" ]; then
 fi
 
 # Run drift detector with JSON output
-echo "🚀 Executing DriftGuard..."
-eval "dotnet run --no-build --configuration Release --project DriftGuard.csproj -- $ARGS" > full-output.txt 2>&1 || true
+echo "🚀 Executing BicepGuard..."
+eval "dotnet run --no-build --configuration Release --project BicepGuard.csproj -- $ARGS" > full-output.txt 2>&1 || true
 
 # Check if output file was created
 if [ ! -f full-output.txt ]; then

@@ -27,8 +27,8 @@ on:
         required: false
         type: string
         default: 'production'
-      driftguard-version:
-        description: 'DriftGuard version to use'
+      bicepguard-version:
+        description: 'BicepGuard version to use'
         required: false
         type: string
         default: 'v5.0.0'
@@ -82,16 +82,16 @@ jobs:
     - name: 📥 Checkout Repository
       uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
-    - name: 📦 Download DriftGuard
+    - name: 📦 Download BicepGuard
       env:
-        DRIFTGUARD_VERSION: ${{ inputs.driftguard-version }}
+        BICEPGUARD_VERSION: ${{ inputs.bicepguard-version }}
       run: |
-        echo "Downloading DriftGuard ${DRIFTGUARD_VERSION}..."
-        curl -Lo driftguard.tar.gz "https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/releases/download/${DRIFTGUARD_VERSION}/driftguard-linux-x64.tar.gz" || {
+        echo "Downloading BicepGuard ${BICEPGUARD_VERSION}..."
+        curl -Lo bicepguard.tar.gz "https://github.com/mwhooo/bicepguard/releases/download/${BICEPGUARD_VERSION}/bicepguard-linux-x64.tar.gz" || {
           echo "Binary not found, downloading source and building..."
-          curl -Lo driftguard.zip "https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/archive/refs/tags/${DRIFTGUARD_VERSION}.zip"
-          unzip -q driftguard.zip
-          mv pe-az-driftguard-* driftguard-src
+          curl -Lo bicepguard.zip "https://github.com/mwhooo/bicepguard/archive/refs/tags/${BICEPGUARD_VERSION}.zip"
+          unzip -q bicepguard.zip
+          mv BicepGuard-* bicepguard-src
         }
 
     - name: 🔧 Setup .NET
@@ -99,16 +99,16 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    - name: 🏗️ Build DriftGuard (if needed)
+    - name: 🏗️ Build BicepGuard (if needed)
       run: |
-        if [ -d "driftguard-src" ]; then
-          cd driftguard-src
+        if [ -d "bicepguard-src" ]; then
+          cd bicepguard-src
           dotnet build --configuration Release
-          echo "DRIFTGUARD_PATH=driftguard-src/bin/Release/net8.0/DriftGuard.dll" >> $GITHUB_ENV
-        elif [ -f "driftguard.tar.gz" ]; then
-          tar -xzf driftguard.tar.gz
-          chmod +x driftguard
-          echo "DRIFTGUARD_PATH=./driftguard" >> $GITHUB_ENV
+          echo "BICEPGUARD_PATH=bicepguard-src/bin/Release/net8.0/BicepGuard.dll" >> $GITHUB_ENV
+        elif [ -f "bicepguard.tar.gz" ]; then
+          tar -xzf bicepguard.tar.gz
+          chmod +x bicepguard
+          echo "BICEPGUARD_PATH=./bicepguard" >> $GITHUB_ENV
         fi
 
     - name: 🔧 Install Bicep CLI
@@ -172,8 +172,8 @@ jobs:
         
         echo "Running drift detection for $TARGET_DESC"
         
-        if [[ "$DRIFTGUARD_PATH" == *.dll ]]; then
-          dotnet $DRIFTGUARD_PATH \
+        if [[ "$BICEPGUARD_PATH" == *.dll ]]; then
+          dotnet $BICEPGUARD_PATH \
             --bicep-file "$INPUT_BICEP_FILE" \
             $SCOPE_ARGS \
             --output Json \
@@ -182,7 +182,7 @@ jobs:
             $AUTOFIX \
             > drift-report.json 2>&1
         else
-          $DRIFTGUARD_PATH \
+          $BICEPGUARD_PATH \
             --bicep-file "$INPUT_BICEP_FILE" \
             $SCOPE_ARGS \
             --output Json \

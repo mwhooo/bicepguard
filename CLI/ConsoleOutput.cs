@@ -1,7 +1,7 @@
-using DriftGuard.Models;
+using BicepGuard.Models;
 using System.Reflection;
 
-namespace DriftGuard.CLI;
+namespace BicepGuard.CLI;
 
 /// <summary>
 /// Handles console output with support for both Unicode and ASCII modes.
@@ -81,7 +81,7 @@ public static class ConsoleOutput
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
             .InformationalVersion ?? "0.0.0";
 
-        Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} Azure DriftGuard v{version}");
+        Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} Azure BicepGuard v{version}");
         Console.WriteLine($"{(simpleOutput ? "[FILE]" : "📄")} Bicep Template: {bicepFile.Name}");
 
         if (parametersFile != null)

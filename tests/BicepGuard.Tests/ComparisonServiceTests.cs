@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using FluentAssertions;
-using DriftGuard.Models;
-using DriftGuard.Services;
+using BicepGuard.Models;
+using BicepGuard.Services;
 using Newtonsoft.Json.Linq;
 
-namespace DriftGuard.Tests.Services;
+namespace BicepGuard.Tests.Services;
 
 public class ComparisonServiceTests
 {

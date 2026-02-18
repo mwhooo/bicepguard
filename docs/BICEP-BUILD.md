@@ -42,8 +42,8 @@ find . -name "*.bicep" -exec bicep build {} \;
 The generated JSON files are:
 - ✅ **Build artifacts** - generated from source Bicep files
 - ❌ **Not tracked in git** - excluded via .gitignore  
-- 🔄 **Generated as needed** - by DriftGuard or manual build
+- 🔄 **Generated as needed** - by BicepGuard or manual build
 
 ## Automatic Building
 
-DriftGuard automatically compiles Bicep to ARM JSON as part of its process, so manual building is typically not required unless you want to inspect the generated ARM templates.
+BicepGuard automatically compiles Bicep to ARM JSON as part of its process, so manual building is typically not required unless you want to inspect the generated ARM templates.

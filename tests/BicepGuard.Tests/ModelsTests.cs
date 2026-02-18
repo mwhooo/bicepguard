@@ -4,9 +4,9 @@ using System.Linq;
 using System.IO;
 using Xunit;
 using FluentAssertions;
-using DriftGuard.Models;
+using BicepGuard.Models;
 
-namespace DriftGuard.Tests.Models;
+namespace BicepGuard.Tests.Models;
 
 public class DriftDetectionResultTests
 {

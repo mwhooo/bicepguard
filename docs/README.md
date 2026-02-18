@@ -1,6 +1,6 @@
 # Documentation
 
-This directory contains comprehensive documentation for DriftGuard.
+This directory contains comprehensive documentation for BicepGuard.
 
 ## Available Documentation
 
@@ -19,10 +19,10 @@ This directory contains comprehensive documentation for DriftGuard.
 Configuration guide for GitHub Advanced Security features including CodeQL analysis and dependency scanning.
 
 ### [Bicep Module Development Guide](BICEP-BUILD.md)
-Documentation for developing and maintaining the modular Bicep templates used by DriftGuard.
+Documentation for developing and maintaining the modular Bicep templates used by BicepGuard.
 
 ### [Release Notes](RELEASE-NOTES.md)
-Version history and changelog for DriftGuard.
+Version history and changelog for BicepGuard.
 
 ### [Monitoring Setup](MONITORING.md)
 Guide for setting up automated drift monitoring with GitHub Actions.

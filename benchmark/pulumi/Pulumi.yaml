@@ -1,8 +1,0 @@
-name: iac-benchmark
-runtime:
-  name: python
-  options:
-    virtualenv: venv
-description: IaC Benchmark - Pulumi Azure Infrastructure for comparing deployment speeds
-config:
-  azure-native:location: westeurope

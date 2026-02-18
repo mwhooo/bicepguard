@@ -60,7 +60,7 @@ jobs:
         git push origin "v${{ steps.version.outputs.version }}"
         
     - name: 📦 Restore dependencies
-      run: dotnet restore DriftGuard.csproj
+      run: dotnet restore BicepGuard.csproj
       
     - name: 🏗️ Build release artifacts
       env:
@@ -70,20 +70,20 @@ jobs:
         mkdir -p release-artifacts
         
         # Build for Windows x64 (inject version from git tag)
-        dotnet publish DriftGuard.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$VERSION -o ./temp/win-x64
-        zip -r release-artifacts/DriftGuard-${VERSION}-win-x64.zip ./temp/win-x64/
+        dotnet publish BicepGuard.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$VERSION -o ./temp/win-x64
+        zip -r release-artifacts/BicepGuard-${VERSION}-win-x64.zip ./temp/win-x64/
         
         # Build for Linux x64  
-        dotnet publish DriftGuard.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$VERSION -o ./temp/linux-x64
-        tar -czf release-artifacts/DriftGuard-${VERSION}-linux-x64.tar.gz -C ./temp/linux-x64 .
+        dotnet publish BicepGuard.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$VERSION -o ./temp/linux-x64
+        tar -czf release-artifacts/BicepGuard-${VERSION}-linux-x64.tar.gz -C ./temp/linux-x64 .
         
         # Build for macOS x64
-        dotnet publish DriftGuard.csproj -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$VERSION -o ./temp/osx-x64
-        zip -r release-artifacts/DriftGuard-${VERSION}-osx-x64.zip ./temp/osx-x64/
+        dotnet publish BicepGuard.csproj -c Release -r osx-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$VERSION -o ./temp/osx-x64
+        zip -r release-artifacts/BicepGuard-${VERSION}-osx-x64.zip ./temp/osx-x64/
         
         # Create portable .NET version (requires .NET runtime)
-        dotnet publish DriftGuard.csproj -c Release --no-self-contained -p:Version=$VERSION -o ./temp/portable
-        zip -r release-artifacts/DriftGuard-${VERSION}-portable.zip ./temp/portable/
+        dotnet publish BicepGuard.csproj -c Release --no-self-contained -p:Version=$VERSION -o ./temp/portable
+        zip -r release-artifacts/BicepGuard-${VERSION}-portable.zip ./temp/portable/
         
     - name: 📋 Generate release notes
       id: changelog
@@ -101,7 +101,7 @@ jobs:
         
         # Create release notes
         cat > release_notes.md << EOF
-        # DriftGuard v${{ steps.version.outputs.version }}
+        # BicepGuard v${{ steps.version.outputs.version }}
         
         ## 🎯 What's New
         
@@ -115,16 +115,16 @@ jobs:
         
         Choose the appropriate package for your platform:
         
-        - **Windows x64**: \`DriftGuard-${{ steps.version.outputs.version }}-win-x64.zip\` (Self-contained executable)
-        - **Linux x64**: \`DriftGuard-${{ steps.version.outputs.version }}-linux-x64.tar.gz\` (Self-contained executable)
-        - **macOS x64**: \`DriftGuard-${{ steps.version.outputs.version }}-osx-x64.zip\` (Self-contained executable)
-        - **Portable**: \`DriftGuard-${{ steps.version.outputs.version }}-portable.zip\` (Requires .NET 8 runtime)
+        - **Windows x64**: \`BicepGuard-${{ steps.version.outputs.version }}-win-x64.zip\` (Self-contained executable)
+        - **Linux x64**: \`BicepGuard-${{ steps.version.outputs.version }}-linux-x64.tar.gz\` (Self-contained executable)
+        - **macOS x64**: \`BicepGuard-${{ steps.version.outputs.version }}-osx-x64.zip\` (Self-contained executable)
+        - **Portable**: \`BicepGuard-${{ steps.version.outputs.version }}-portable.zip\` (Requires .NET 8 runtime)
         
         ## 🚀 Quick Start
         
         1. Download the appropriate package for your platform
         2. Extract the archive
-        3. Run: \`./DriftGuard --bicep-file template.bicep --resource-group myResourceGroup\`
+        3. Run: \`./BicepGuard --bicep-file template.bicep --resource-group myResourceGroup\`
         
         ## ✨ Key Features
         
@@ -136,7 +136,7 @@ jobs:
         
         ## 📚 Documentation
         
-        Full documentation available in the [README.md](https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/blob/main/README.md)
+        Full documentation available in the [README.md](https://github.com/mwhooo/bicepguard/blob/main/README.md)
         
         Built with ❤️ for DevOps teams practicing Infrastructure as Code!
         EOF
@@ -149,7 +149,7 @@ jobs:
     - name: 🚀 Create GitHub Release
       uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
       with:
-        name: DriftGuard v${{ steps.version.outputs.version }}
+        name: BicepGuard v${{ steps.version.outputs.version }}
         body: ${{ steps.changelog.outputs.release_notes }}
         files: release-artifacts/*
         draft: false
@@ -164,4 +164,4 @@ jobs:
         echo "📦 Release artifacts:"
         ls -la release-artifacts/
         echo ""
-        echo "🔗 Release URL: https://github.com/NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard/releases/tag/v${{ steps.version.outputs.version }}"
+        echo "🔗 Release URL: https://github.com/mwhooo/bicepguard/releases/tag/v${{ steps.version.outputs.version }}"

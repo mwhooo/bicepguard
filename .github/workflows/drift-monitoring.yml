@@ -25,7 +25,7 @@ permissions:
 jobs:
   monitor-drift:
     # This job will only run when copied to a different repository
-    if: github.repository != 'NL-AMS-PLATFORM-ENGINEER/pe-az-driftguard'
+    if: github.repository != 'mwhooo/bicepguard'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -56,8 +56,8 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: Build DriftGuard
-      run: dotnet build DriftGuard.csproj --configuration Release
+    - name: Build BicepGuard
+      run: dotnet build BicepGuard.csproj --configuration Release
 
     - name: Check Drift
       id: check

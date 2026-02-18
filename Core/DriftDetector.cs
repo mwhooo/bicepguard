@@ -1,7 +1,7 @@
-using DriftGuard.Models;
-using DriftGuard.Services;
+using BicepGuard.Models;
+using BicepGuard.Services;
 
-namespace DriftGuard.Core;
+namespace BicepGuard.Core;
 
 public class DriftDetector
 {

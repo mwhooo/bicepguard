@@ -2,11 +2,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Launch (DriftGuard)",
+            "name": ".NET Core Launch (BicepGuard)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "Build DriftGuard",
-            "program": "${workspaceFolder}/bin/Debug/net8.0/DriftGuard.dll",
+            "preLaunchTask": "Build BicepGuard",
+            "program": "${workspaceFolder}/bin/Debug/net8.0/BicepGuard.dll",
             "args": [
                 "--bicep-file",
                 "samples/main-template.bicepparam",

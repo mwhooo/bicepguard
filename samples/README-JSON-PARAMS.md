@@ -1,6 +1,6 @@
-# Using DriftGuard with JSON Parameter Files
+# Using BicepGuard with JSON Parameter Files
 
-DriftGuard supports Azure ARM JSON parameter files in addition to `.bicepparam` files. This is useful for existing Landing Zone deployments and MLZ workflows.
+BicepGuard supports Azure ARM JSON parameter files in addition to `.bicepparam` files. This is useful for existing Landing Zone deployments and MLZ workflows.
 
 ## JSON Parameter File Format
 
@@ -89,7 +89,7 @@ Example GitHub Actions step:
 ```yaml
 - name: Check Drift
   run: |
-    ./DriftGuard \
+    ./BicepGuard \
       --bicep-file ${{ env.networkingTemplateFile }} \
       --parameters-file ${{ env.networkingParametersFile }} \
       --scope Subscription \

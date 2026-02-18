@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../DriftGuard.csproj" />
+    <ProjectReference Include="../../BicepGuard.csproj" />
   </ItemGroup>
 
 </Project>

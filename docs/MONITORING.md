@@ -1,4 +1,4 @@
-# 🔍 DriftGuard Monitoring
+# 🔍 BicepGuard Monitoring
 
 This project includes automated drift monitoring using GitHub Actions.
 
@@ -47,7 +47,7 @@ gh workflow run drift-monitoring.yml
 ```
 
 ### Drift Detection Process
-1. **Download** latest DriftGuard binary
+1. **Download** latest BicepGuard binary
 2. **Login** to Azure using service principal
 3. **Compare** Bicep templates with live resources
 4. **Report** findings via GitHub issues
@@ -98,7 +98,7 @@ schedule:
 The monitoring uses `--simple-output` for better CI compatibility, but you can also generate HTML reports:
 
 ```bash
-./DriftGuard --bicep-file template.bicep --resource-group myRG --output Html
+./BicepGuard --bicep-file template.bicep --resource-group myRG --output Html
 ```
 
 ## 🚨 Issue Management
@@ -139,7 +139,7 @@ The monitoring uses `--simple-output` for better CI compatibility, but you can a
 ### Debugging
 ```bash
 # Test locally with same settings
-./DriftGuard --bicep-file template.bicep --resource-group myRG --simple-output
+./BicepGuard --bicep-file template.bicep --resource-group myRG --simple-output
 
 # Check Azure CLI access
 az account show
@@ -164,9 +164,9 @@ az resource list --resource-group myRG
 ### Custom Reporting
 ```bash
 # Generate multiple report formats
-./DriftGuard --output Json --simple-output
-./DriftGuard --output Html
-./DriftGuard --output Markdown
+./BicepGuard --output Json --simple-output
+./BicepGuard --output Html
+./BicepGuard --output Markdown
 ```
 
 ### Conditional Monitoring

@@ -1,5 +1,0 @@
-encryptionsalt: v1:S+SAQUHx/PQ=:v1:wqbnzPt/VFLKdNma:JZami2nwDVRo1p8dI+za48RQ8X0nJQ==
-config:
-  iac-benchmark:resourceGroupName: driftguard-benchmark-pulumi-rg
-  iac-benchmark:location: westeurope
-  azure-native:location: westeurope
