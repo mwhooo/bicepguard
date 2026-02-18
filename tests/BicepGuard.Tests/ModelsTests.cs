@@ -211,7 +211,6 @@ public class PropertyDriftTests
     [InlineData(DriftType.Missing)]
     [InlineData(DriftType.Extra)]
     [InlineData(DriftType.Modified)]
-    [InlineData(DriftType.Added)]
     public void Type_ShouldAllowAllDriftTypes(DriftType driftType)
     {
         // Arrange & Act
@@ -294,86 +293,6 @@ public class PropertyDriftTests
         drift.ExpectedValue.Should().Be(true);
         drift.ActualValue.Should().Be(false);
         drift.Type.Should().Be(DriftType.Modified);
-    }
-}
-
-public class AzureResourceTests
-{
-    [Fact]
-    public void Constructor_ShouldInitializeWithDefaults()
-    {
-        // Act
-        var resource = new AzureResource();
-
-        // Assert
-        resource.Type.Should().BeEmpty();
-        resource.Name.Should().BeEmpty();
-        resource.Id.Should().BeEmpty();
-        resource.Properties.Should().BeEmpty();
-        resource.Properties.Should().NotBeNull();
-    }
-
-    [Fact]
-    public void Properties_CanBeSet()
-    {
-        // Arrange
-        var resource = new AzureResource();
-
-        // Act
-        resource.Type = "Microsoft.Storage/storageAccounts";
-        resource.Name = "mystorageaccount";
-        resource.Id = "/subscriptions/12345/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/mystorageaccount";
-
-        // Assert
-        resource.Type.Should().Be("Microsoft.Storage/storageAccounts");
-        resource.Name.Should().Be("mystorageaccount");
-        resource.Id.Should().Contain("/subscriptions/");
-    }
-
-    [Fact]
-    public void Properties_DictionaryCanHaveItemsAdded()
-    {
-        // Arrange
-        var resource = new AzureResource();
-
-        // Act
-        resource.Properties.Add("accessTier", "Hot");
-        resource.Properties.Add("encrypted", true);
-        resource.Properties.Add("location", "eastus");
-
-        // Assert
-        resource.Properties.Should().HaveCount(3);
-        resource.Properties["accessTier"].Should().Be("Hot");
-        resource.Properties["encrypted"].Should().Be(true);
-    }
-
-    [Fact]
-    public void Properties_CanStoreNullValues()
-    {
-        // Arrange
-        var resource = new AzureResource();
-
-        // Act
-        resource.Properties.Add("someProperty", null);
-
-        // Assert
-        resource.Properties["someProperty"].Should().BeNull();
-    }
-
-    [Fact]
-    public void Properties_CanStoreComplexObjects()
-    {
-        // Arrange
-        var resource = new AzureResource();
-        var tags = new Dictionary<string, string> { { "env", "prod" }, { "team", "platform" } };
-
-        // Act
-        resource.Properties.Add("tags", tags);
-
-        // Assert
-        var storedTags = resource.Properties["tags"] as Dictionary<string, string>;
-        storedTags.Should().NotBeNull();
-        storedTags!.Should().HaveCount(2);
     }
 }
 
@@ -686,7 +605,6 @@ public class EnumTests
         values.Should().Contain(DriftType.Missing);
         values.Should().Contain(DriftType.Extra);
         values.Should().Contain(DriftType.Modified);
-        values.Should().Contain(DriftType.Added);
-        values.Should().HaveCount(4);
+        values.Should().HaveCount(3);
     }
 }

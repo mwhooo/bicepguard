@@ -43,16 +43,7 @@ public enum DriftType
 {
     Missing,      // Property exists in template but not in Azure
     Extra,        // Property exists in Azure but not in template
-    Modified,     // Property value differs between template and Azure
-    Added         // Resource or property was manually added in Azure (not in template)
-}
-
-public class AzureResource
-{
-    public string Type { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Id { get; set; } = string.Empty;
-    public Dictionary<string, object?> Properties { get; set; } = new();
+    Modified      // Property value differs between template and Azure
 }
 
 public class DeploymentResult

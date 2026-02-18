@@ -26,14 +26,6 @@ public static class ConsoleOutput
     }
 
     /// <summary>
-    /// Writes an info message to the console.
-    /// </summary>
-    public static void WriteInfo(string message, bool simpleOutput)
-    {
-        Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} {message}");
-    }
-
-    /// <summary>
     /// Writes a tip/suggestion message to the console.
     /// </summary>
     public static void WriteTip(string message, bool simpleOutput)

@@ -67,15 +67,6 @@ public class DriftDetector
         }
     }
 
-    // Backward compatibility overload for resource-group scope
-    public Task<DriftDetectionResult> DetectDriftAsync(
-        FileInfo bicepFile, 
-        string resourceGroup, 
-        OutputFormat outputFormat = OutputFormat.Console)
-    {
-        return DetectDriftAsync(bicepFile, null, DeploymentScope.ResourceGroup, resourceGroup, null, null, outputFormat);
-    }
-
     public async Task<DeploymentResult> DeployTemplateAsync(
         FileInfo bicepFile,
         FileInfo? parametersFile,
@@ -157,9 +148,4 @@ public class DriftDetector
         }
     }
 
-    // Backward compatibility overload for resource-group scope
-    public Task<DeploymentResult> DeployTemplateAsync(FileInfo bicepFile, string resourceGroup)
-    {
-        return DeployTemplateAsync(bicepFile, null, DeploymentScope.ResourceGroup, resourceGroup, null, null);
-    }
 }

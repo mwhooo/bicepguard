@@ -38,7 +38,7 @@ public class WhatIfJsonService
 
             if (fileExtension == ".bicepparam")
             {
-                var referencedBicepFile = await GetReferencedBicepFileAsync(bicepFilePath);
+                var referencedBicepFile = await BicepParamHelper.GetReferencedBicepFileAsync(bicepFilePath);
                 templateFile = referencedBicepFile;
                 argumentsString = BuildWhatIfArguments(scope, referencedBicepFile, bicepFilePath, resourceGroup, subscription, location);
             }
@@ -108,14 +108,6 @@ public class WhatIfJsonService
             Console.WriteLine($"❌ Error running what-if: {ex.Message}");
             throw;
         }
-    }
-
-    /// <summary>
-    /// Backward compatibility overload for resource-group scope.
-    /// </summary>
-    public Task<DriftDetectionResult> RunWhatIfAsync(string bicepFilePath, string resourceGroup)
-    {
-        return RunWhatIfAsync(bicepFilePath, null, DeploymentScope.ResourceGroup, resourceGroup, null, null);
     }
 
     /// <summary>
@@ -566,55 +558,5 @@ public class WhatIfJsonService
 
         return ("Unknown", resourceId);
     }
-
-    // here we start seaching for the using statement in the bicepparam file, 
-    // so we can extract the bicep file belonging to the bicepparam
-    private static async Task<string> GetReferencedBicepFileAsync(string bicepparamFilePath)
-    {
-        // read the whole file and split lines by \n
-        var content = await File.ReadAllTextAsync(bicepparamFilePath);
-        var lines = content.Split('\n');
-        
-        foreach (var line in lines)
-        {
-            var trimmed = line.Trim(); // trim in case someone indented the using statement.
-            if (trimmed.StartsWith("using"))
-            {
-                // Extract the file path from: using 'file.bicep' or using './file.bicep'
-                var match = System.Text.RegularExpressions.Regex.Match(trimmed, @"using\s+'([^']+)'");
-                if (match.Success)
-                {
-                    var referencedFile = match.Groups[1].Value; // here we get the filename of the bicepfile
-                    var directory = Path.GetDirectoryName(Path.GetFullPath(bicepparamFilePath)) ?? "";
-                    var fullPath = Path.GetFullPath(Path.Combine(directory, referencedFile));
-                    
-                    // Security check: ensure the resolved path is within the current working directory tree
-                    // This allows relative paths like ../../../deployments/infra.bicep within a repo
-                    // but prevents access to files outside the repo (e.g., /etc/passwd)
-                    var workingDirectory = Path.GetFullPath(Environment.CurrentDirectory);
-                    if (!fullPath.StartsWith(workingDirectory, StringComparison.OrdinalIgnoreCase))
-                    {
-                        throw new UnauthorizedAccessException(
-                            $"Security violation: Referenced file '{referencedFile}' resolves to '{fullPath}' " +
-                            $"which is outside the allowed directory '{workingDirectory}'.");
-                    }
-                    
-                    if (!File.Exists(fullPath))
-                    {
-                        throw new FileNotFoundException($"Referenced file '{referencedFile}' does not exist at resolved path '{fullPath}'.");
-                    }
-                    if ((File.GetAttributes(fullPath) & FileAttributes.Directory) == FileAttributes.Directory)
-                    {
-                        throw new InvalidOperationException($"Referenced path '{fullPath}' is a directory, not a file.");
-                    }
-                    
-                    return fullPath;
-                }
-            }
-        }
-        
-        throw new InvalidOperationException($"Could not find 'using' statement in {bicepparamFilePath}");
-    }
-
 
 }
