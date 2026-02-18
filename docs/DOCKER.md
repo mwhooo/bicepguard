@@ -1,6 +1,6 @@
 # 🐳 Docker Usage Guide
 
-DriftGuard is available as a public Docker container on Docker Hub, making it easy to run without installing dependencies.
+BicepGuard is available as a public Docker container on Docker Hub, making it easy to run without installing dependencies.
 
 ## Prerequisites
 
@@ -13,13 +13,13 @@ DriftGuard is available as a public Docker container on Docker Hub, making it ea
 
 ```bash
 # Pull latest version (no authentication needed - it's public!)
-docker pull mwhooo/driftguard:latest
+docker pull mwhooo/bicepguard:latest
 
 # Pull specific version
-docker pull mwhooo/driftguard:5.0.0
+docker pull mwhooo/bicepguard:5.0.0
 ```
 
-**Image Location:** https://hub.docker.com/r/mwhooo/driftguard
+**Image Location:** https://hub.docker.com/r/mwhooo/bicepguard
 
 ### Basic Usage
 

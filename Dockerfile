@@ -7,11 +7,11 @@ WORKDIR /src
 ARG VERSION=0.0.0-dev
 
 # Copy project files
-COPY ["DriftGuard.csproj", "./"]
+COPY ["BicepGuard.csproj", "./"]
 COPY ["Directory.Build.props", "./"]
 
 # Restore dependencies
-RUN dotnet restore "DriftGuard.csproj"
+RUN dotnet restore "BicepGuard.csproj"
 
 # Copy source code
 COPY . .
@@ -50,7 +50,7 @@ ENTRYPOINT ["dotnet", "/opt/bicepguard/BicepGuard.dll"]
 CMD ["--help"]
 
 # Metadata
-LABEL org.opencontainers.image.title="DriftGuard" \
+LABEL org.opencontainers.image.title="BicepGuard" \
       org.opencontainers.image.description="Azure infrastructure drift detection and remediation tool" \
       org.opencontainers.image.vendor="Mark Bakker" \
-      org.opencontainers.image.source="https://github.com/mwhooo/driftguard"
+      org.opencontainers.image.source="https://github.com/mwhooo/bicepguard"

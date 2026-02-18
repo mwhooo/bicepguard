@@ -4,7 +4,7 @@ using System.CommandLine;
 namespace BicepGuard.CLI;
 
 /// <summary>
-/// Defines all command-line options for DriftGuard.
+/// Defines all command-line options for BicepGuard.
 /// static helpers methods
 /// </summary>
 public static class CommandLineOptions

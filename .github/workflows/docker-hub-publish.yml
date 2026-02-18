@@ -17,7 +17,7 @@ on:
 
 env:
   DOCKERHUB_USERNAME: mwhooo
-  IMAGE_NAME: driftguard
+  IMAGE_NAME: bicepguard
 
 permissions:
   contents: read
@@ -58,7 +58,7 @@ jobs:
           --label "org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
           --label "org.opencontainers.image.revision=${{ github.sha }}" \
           --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
-          --label "org.opencontainers.image.title=DriftGuard" \
+          --label "org.opencontainers.image.title=BicepGuard" \
           --label "org.opencontainers.image.description=Azure infrastructure drift detection and remediation tool" \
           .
           

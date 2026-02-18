@@ -41,7 +41,7 @@ public class BicepGuardCommand
     /// </summary>
     public RootCommand BuildRootCommand()
     {
-        var rootCommand = new RootCommand("Azure DriftGuard - Configuration Drift Detector")
+        var rootCommand = new RootCommand("Azure BicepGuard - Configuration Drift Detector")
         {
             Description = "Detects configuration drift between Bicep/ARM templates and live Azure resources"
         };

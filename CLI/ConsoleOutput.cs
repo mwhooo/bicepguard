@@ -81,7 +81,7 @@ public static class ConsoleOutput
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
             .InformationalVersion ?? "0.0.0";
 
-        Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} Azure DriftGuard v{version}");
+        Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} Azure BicepGuard v{version}");
         Console.WriteLine($"{(simpleOutput ? "[FILE]" : "📄")} Bicep Template: {bicepFile.Name}");
 
         if (parametersFile != null)
