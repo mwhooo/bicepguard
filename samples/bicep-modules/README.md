@@ -125,7 +125,7 @@ When adding new modules:
 1. **Follow naming convention**: `resource-type.bicep`
 2. **Export configuration types** with `@export()`
 3. **Use consistent parameter patterns** (config, location, tags)
-4. **Add comprehensive examples** in the samples directory
+4. **Add examples** in the samples directory
 5. **Update this README** with module description
 6. **Test thoroughly** before submitting
 
