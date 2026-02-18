@@ -4,41 +4,35 @@ This directory contains comprehensive documentation for BicepGuard.
 
 ## Available Documentation
 
+### [Integration & Monitoring Guide](INTEGRATION.md)
+**Start here!** Complete guide for integrating drift detection into GitHub Actions workflows, including automated monitoring setup and CI/CD integration.
+
 ### [Drift Ignore Configuration Guide](DRIFT-IGNORE.md)
-**Essential reading for production use!** Comprehensive guide to configuring the drift ignore system to suppress Azure platform behaviors and false positive drift detections.
+**Essential for production!** Configure drift ignore rules to suppress Azure platform behaviors and false positives.
 
-**Topics covered:**
-- Configuration file structure and syntax
-- Resource-specific ignore rules with conditional matching
-- Global pattern matching for common Azure properties
-- Examples for major Azure services (Storage, Service Bus, Key Vault, etc.)
-- Best practices and troubleshooting
-- Advanced features like pattern matching and multiple conditions
-
-### [Security Setup Guide](SECURITY-SETUP.md) 
-Configuration guide for GitHub Advanced Security features including CodeQL analysis and dependency scanning.
-
-### [Bicep Module Development Guide](BICEP-BUILD.md)
-Documentation for developing and maintaining the modular Bicep templates used by BicepGuard.
-
-### [Release Notes](RELEASE-NOTES.md)
-Version history and changelog for BicepGuard.
-
-### [Monitoring Setup](MONITORING.md)
-Guide for setting up automated drift monitoring with GitHub Actions.
+### [Docker Usage Guide](DOCKER.md)
+Run BicepGuard as a Docker container with complete authentication and integration options.
 
 ### [OpenID Connect Setup](OIDC-SETUP.md)
-Instructions for configuring OIDC authentication with Azure for secure GitHub Actions workflows.
+Configure OIDC for secure, credential-free Azure authentication in GitHub Actions.
 
-### [Testing Documentation](TESTING.md)
-Information about test infrastructure, known issues, and future testing plans.
+### [Release Notes](RELEASE-NOTES.md)
+Version history and feature highlights for all BicepGuard releases.
 
 ## Quick Links
 
+- **Repository**: [github.com/mwhooo/bicepguard](https://github.com/mwhooo/bicepguard)
+- **Docker Hub**: [mwhooo/bicepguard](https://hub.docker.com/r/mwhooo/bicepguard)
 - **Getting Started**: See main [README.md](../README.md)
-- **Drift Ignore Examples**: Jump to [Common Patterns](DRIFT-IGNORE.md#common-ignore-patterns)
-- **Troubleshooting**: See [Drift Ignore Troubleshooting](DRIFT-IGNORE.md#troubleshooting)
-- **GitHub Actions**: See [Monitoring Setup](MONITORING.md)
+
+## Documentation Structure
+
+1. **Getting Started** → Main README.md
+2. **CI/CD Setup** → INTEGRATION.md (includes monitoring)
+3. **Fine-tuning** → DRIFT-IGNORE.md
+4. **Containerization** → DOCKER.md
+5. **Security** → OIDC-SETUP.md
+6. **Release Info** → RELEASE-NOTES.md
 
 ## Contributing
 
@@ -46,4 +40,4 @@ When adding new documentation:
 1. Follow the existing structure and formatting
 2. Include practical examples
 3. Add cross-references to related documentation
-4. Update this index file with new documents
+4. Update this index file
