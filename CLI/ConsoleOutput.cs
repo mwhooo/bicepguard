@@ -109,7 +109,7 @@ public static class ConsoleOutput
         }
 
         // Show ignore config path being used
-        var ignoreConfigPath = ignoreConfig?.FullName ?? Path.Combine(Directory.GetCurrentDirectory(), "drift-ignore.json");
+        var ignoreConfigPath = ignoreConfig?.FullName ?? Path.Join(Directory.GetCurrentDirectory(), "drift-ignore.json");
         var ignoreExists = File.Exists(ignoreConfigPath);
         Console.WriteLine($"{(simpleOutput ? "[IGNORE]" : "🔇")} Ignore Config: {Path.GetFileName(ignoreConfigPath)} {(ignoreExists ? "(found)" : "(not found)")}");
 

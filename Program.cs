@@ -5,13 +5,6 @@ namespace DriftGuard;
 
 /// <summary>
 /// Entry point for the DriftGuard application.
-/// 
-/// Architecture:
-/// - Command-line options are defined in CLI/CommandLineOptions.cs
-/// - Input validation logic is in CLI/InputValidator.cs  
-/// - Console output formatting is in CLI/ConsoleOutput.cs
-/// - Main command handler logic is in CLI/DriftGuardCommand.cs
-/// 
 /// This keeps Program.cs focused on being a clean entry point while all the
 /// command-line argument definitions, validation, and handling logic is properly
 /// organized in separate, testable components.

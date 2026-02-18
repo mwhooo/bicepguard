@@ -7,30 +7,18 @@ namespace DriftGuard.CLI;
 public static class InputValidator
 {
     /// <summary>
-    /// Validates the Bicep file exists and is accessible.
-    /// </summary>
-    public static (bool IsValid, string? ErrorMessage) ValidateBicepFile(FileInfo bicepFile)
-    {
-        if (!bicepFile.Exists)
-        {
-            return (false, $"Bicep file not found: {bicepFile.FullName}");
-        }
-
-        return (true, null);
-    }
-
-    /// <summary>
     /// Validates that bicepparam and parameters file are not both specified.
     /// A .bicepparam file provided via --bicep-file cannot be combined with --parameters-file.
     /// </summary>
-    public static (bool IsValid, string? ErrorMessage) ValidateParameterConfiguration(
+    public static (bool IsValid, string? ErrorMessage) ValidateBicepParamsSpecified(
         FileInfo bicepFile,
         FileInfo? parametersFile)
     {
         if (parametersFile != null &&
             string.Equals(bicepFile.Extension, ".bicepparam", StringComparison.OrdinalIgnoreCase))
         {
-            return (false, "Cannot use a .bicepparam file via --bicep-file together with --parameters-file. Please specify only one source of parameters.");
+            //ConsoleOutput.WriteError($"Cannot use a .bicepparam file via --bicep-file together with --parameters-file. Please specify only the .bicepparam file", simpleOutput: true);
+            return (false, "Cannot use a .bicepparam file via --bicep-file together with --parameters-file. Please specify only the .bicepparam file");
         }
 
         return (true, null);
@@ -42,9 +30,7 @@ public static class InputValidator
     public static (bool IsValid, string? ErrorMessage) ValidateParametersFile(FileInfo? parametersFile)
     {
         if (parametersFile == null)
-        {
             return (true, null);
-        }
 
         if (!parametersFile.Exists)
         {

@@ -13,6 +13,8 @@ public static class DriftGuardCommand
     /// <summary>
     /// Builds the root command with all options configured.
     /// </summary>
+    /// 
+    /// 
     public static RootCommand BuildRootCommand()
     {
         var rootCommand = new RootCommand("Azure DriftGuard - Configuration Drift Detector")
@@ -20,7 +22,7 @@ public static class DriftGuardCommand
             Description = "Detects configuration drift between Bicep/ARM templates and live Azure resources"
         };
 
-        // Add all options
+        // Add all options to var, since we use them twice - once for defining the command and once for extracting values in the handler
         var bicepFileOption = CommandLineOptions.CreateBicepFileOption();
         var parametersFileOption = CommandLineOptions.CreateParametersFileOption();
         var scopeOption = CommandLineOptions.CreateScopeOption();
@@ -69,6 +71,9 @@ public static class DriftGuardCommand
     /// <summary>
     /// Handles the command execution logic.
     /// </summary>
+    /// 
+    /// i let copilot do the scaffolding, again its not bad, but why not pass an object around, i see
+    /// method signatures with like zillion input params. this can be handled quite differently, probably saving alot of codespace
     private static async Task HandleCommandAsync(
         InvocationContext context,
         Option<FileInfo> bicepFileOption,
@@ -100,8 +105,8 @@ public static class DriftGuardCommand
         {
             // Set up console encoding and simple output mode
             Console.OutputEncoding = System.Text.Encoding.UTF8; // this supports emojis in the console output
-            Environment.SetEnvironmentVariable("SIMPLE_OUTPUT", simpleOutput.ToString());
-            Environment.SetEnvironmentVariable("SHOW_FILTERED", showFiltered.ToString());
+            Environment.SetEnvironmentVariable("SIMPLE_OUTPUT", simpleOutput.ToString()); // set environment variable to indicate simple output mode for use in ConsoleOutput
+            Environment.SetEnvironmentVariable("SHOW_FILTERED", showFiltered.ToString()); // set environment variable to indicate whether to show filtered results
 
             // Validate all inputs
             if (!ValidateInputs(bicepFile, parametersFile, scope, resourceGroup, subscription, location, simpleOutput))
@@ -163,7 +168,13 @@ public static class DriftGuardCommand
 
     /// <summary>
     /// Validates all input arguments.
+    /// 
+    /// 
     /// </summary>
+    
+    // i let copilot scaffold, its not bad, but i see repetative stuff, which i fixed already a couple
+    // i would have handled the boolean return differently for instance, 
+    // not really best practice to return in an if statement, i might revisit this later
     private static bool ValidateInputs(
         FileInfo bicepFile,
         FileInfo? parametersFile,
@@ -174,17 +185,14 @@ public static class DriftGuardCommand
         bool simpleOutput)
     {
         // Validate Bicep file
-        var bicepValidation = InputValidator.ValidateBicepFile(bicepFile);
-        if (!bicepValidation.IsValid)
-        {
-            ConsoleOutput.WriteError(bicepValidation.ErrorMessage!, simpleOutput);
+        if (!bicepFile.Exists) {
+            ConsoleOutput.WriteError($"Bicep file not found: {bicepFile.FullName}", simpleOutput);
             return false;
         }
 
         // Validate parameter configuration
-        var paramConfigValidation = InputValidator.ValidateParameterConfiguration(bicepFile, parametersFile);
-        if (!paramConfigValidation.IsValid)
-        {
+        var paramConfigValidation = InputValidator.ValidateBicepParamsSpecified(bicepFile, parametersFile);
+        if (!paramConfigValidation.IsValid){
             ConsoleOutput.WriteError(paramConfigValidation.ErrorMessage!, simpleOutput);
             return false;
         }
