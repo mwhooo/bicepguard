@@ -65,20 +65,7 @@ public class BicepService
                 // Extract resources from the nested template instead of the deployment resource itself
                 var nestedResources = ExtractResourcesFromModuleDeployment(resourceObj);
                 Console.WriteLine($"    📦 Found {nestedResources.Count} nested resources");
-                
-                // Filter out nested deployment resources that are just wrappers
-                var infrastructureResources = FilterInfrastructureResources(nestedResources);
-                Console.WriteLine($"    🏗️ Infrastructure resources: {infrastructureResources.Count}");
-                
-                if (infrastructureResources.Any())
-                {
-                    resources.AddRange(infrastructureResources);
-                }
-                else
-                {
-                    // If no infrastructure resources found, include all nested resources
-                    resources.AddRange(nestedResources);
-                }
+                resources.AddRange(nestedResources);
             }
             else
             {
@@ -176,75 +163,7 @@ public class BicepService
         return nestedResources;
     }
 
-    private List<JObject> FilterInfrastructureResources(List<JObject> resources)
-    {
-        return FilterInfrastructureResources(resources, 0, MaxRecursionDepth);
-    }
 
-    private List<JObject> FilterInfrastructureResources(List<JObject> resources, int currentDepth, int maxDepth)
-    {
-        var infrastructureResources = new List<JObject>();
-        
-        // Prevent infinite recursion
-        if (currentDepth >= maxDepth)
-        {
-            Console.WriteLine($"      ⚠️  Max recursion depth ({maxDepth}) reached, stopping resource extraction");
-            return infrastructureResources;
-        }
-        
-        // Define resource types that represent actual infrastructure (not deployment wrappers)
-        var infrastructureResourceTypes = new HashSet<string>
-        {
-            "Microsoft.Storage/storageAccounts",
-            "Microsoft.KeyVault/vaults",
-            "Microsoft.Network/virtualNetworks",
-            "Microsoft.Network/networkSecurityGroups",
-            "Microsoft.Network/routeTables",
-            "Microsoft.Network/publicIPAddresses",
-            "Microsoft.Network/loadBalancers",
-            "Microsoft.Compute/virtualMachines",
-            "Microsoft.Compute/virtualMachineScaleSets",
-            "Microsoft.ContainerRegistry/registries",
-            "Microsoft.ContainerService/managedClusters",
-            "Microsoft.Sql/servers",
-            "Microsoft.DBforPostgreSQL/servers",
-            "Microsoft.Cache/Redis",
-            "Microsoft.Web/sites",
-            "Microsoft.Web/serverfarms",
-            "Microsoft.EventHub/namespaces",
-            "Microsoft.ServiceBus/namespaces"
-            // Add more infrastructure resource types as needed
-        };
-        
-        foreach (var resource in resources)
-        {
-            var resourceType = resource["type"]?.ToString();
-            
-            if (!string.IsNullOrEmpty(resourceType))
-            {
-                // Check if this is an infrastructure resource
-                if (infrastructureResourceTypes.Contains(resourceType))
-                {
-                    Console.WriteLine($"      🏗️ Infrastructure resource: {resourceType} (depth: {currentDepth})");
-                    infrastructureResources.Add(resource);
-                }
-                // Check if this is a deployment that might contain more infrastructure
-                else if (resourceType == "Microsoft.Resources/deployments" && HasNestedTemplate(resource))
-                {
-                    Console.WriteLine($"      🔄 Nested deployment found at depth {currentDepth}, recursing...");
-                    var deeperResources = ExtractResourcesFromModuleDeployment(resource);
-                    var deeperInfrastructure = FilterInfrastructureResources(deeperResources, currentDepth + 1, maxDepth);
-                    infrastructureResources.AddRange(deeperInfrastructure);
-                }
-                else
-                {
-                    Console.WriteLine($"      ⚪ Skipping wrapper resource: {resourceType} (depth: {currentDepth})");
-                }
-            }
-        }
-        
-        return infrastructureResources;
-    }
 
     private Dictionary<string, JToken> CreateParameterContext(JObject? deploymentParameters, JObject nestedTemplate)
     {

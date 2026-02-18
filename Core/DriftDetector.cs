@@ -5,19 +5,15 @@ namespace BicepGuard.Core;
 
 public class DriftDetector
 {
-    private readonly BicepService _bicepService;
     private readonly AzureCliService _azureCliService;
-    private readonly ComparisonService _comparisonService;
     private readonly ReportingService _reportingService;
     private readonly DriftIgnoreService? _ignoreService;
     private readonly WhatIfJsonService _whatIfJsonService;
 
     public DriftDetector(string? ignoreConfigPath = null)
     {
-        _bicepService = new BicepService();
         _azureCliService = new AzureCliService();
         _ignoreService = !string.IsNullOrEmpty(ignoreConfigPath) ? new DriftIgnoreService(ignoreConfigPath) : new DriftIgnoreService();
-        _comparisonService = new ComparisonService(_ignoreService);
         _reportingService = new ReportingService();
         _whatIfJsonService = new WhatIfJsonService(_ignoreService);
     }
