@@ -266,7 +266,7 @@ public class ComparisonService
         }
 
         // For comparison purposes, resolve common ARM expressions
-        // This is a simplified resolution for demonstration - in production you'd want more comprehensive resolution
+        // This is a simplified resolution for demonstration - in production you'd want more resolution
         if (value == "[parameters('environmentName')]")
         {
             return "test"; // Default value from template

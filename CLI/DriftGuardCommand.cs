@@ -1,7 +1,7 @@
-using BicepGuard.Core;
-using BicepGuard.Models;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using BicepGuard.Core;
+using BicepGuard.Models;
 
 namespace BicepGuard.CLI;
 

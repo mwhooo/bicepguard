@@ -1,5 +1,5 @@
-using BicepGuard.Models;
 using System.Reflection;
+using BicepGuard.Models;
 
 namespace BicepGuard.CLI;
 

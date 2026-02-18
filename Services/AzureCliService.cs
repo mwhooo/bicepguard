@@ -1,21 +1,15 @@
 using System.Diagnostics;
-using System.Text.Json;
 using BicepGuard.Models;
 using Newtonsoft.Json.Linq;
 
 namespace BicepGuard.Services;
 
-public class AzureCliService
-{
-    public async Task<List<AzureResource>> GetResourcesAsync(string resourceGroup)
-    {
-        try
-        {
+public class AzureCliService {
+    public async Task<List<AzureResource>> GetResourcesAsync(string resourceGroup) {
+        try {
             // Query all resources in the resource group
-            using var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
+            using var process = new Process {
+                StartInfo = new ProcessStartInfo {
                     FileName = GetAzureCLIPath(),
                     Arguments = $"resource list --resource-group \"{resourceGroup}\" --output json",
                     RedirectStandardOutput = true,
@@ -31,22 +25,18 @@ public class AzureCliService
             var error = await process.StandardError.ReadToEndAsync();
             await process.WaitForExitAsync();
 
-            if (process.ExitCode != 0)
-            {
+            if (process.ExitCode != 0) {
                 throw new InvalidOperationException($"Failed to query Azure resources: {error}");
             }
 
             var resourcesArray = JArray.Parse(output);
             var resources = new List<AzureResource>();
 
-            foreach (var resource in resourcesArray)
-            {
-                if (resource is JObject resourceObj)
-                {
+            foreach (var resource in resourcesArray){
+                if (resource is JObject resourceObj){
                     // Get detailed resource information
                     var detailedResource = await GetResourceDetailsAsync(resourceObj["id"]?.ToString() ?? "");
-                    if (detailedResource != null)
-                    {
+                    if (detailedResource != null){
                         resources.Add(detailedResource);
                     }
                 }
@@ -54,20 +44,15 @@ public class AzureCliService
 
             return resources;
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             throw new InvalidOperationException($"Error querying Azure resources in resource group '{resourceGroup}': {ex.Message}", ex);
         }
     }
 
-    public async Task<AzureResource?> GetResourceDetailsAsync(string resourceId)
-    {
-        try
-        {
-            using var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
+    public async Task<AzureResource?> GetResourceDetailsAsync(string resourceId) {
+        try {
+            using var process = new Process {
+                StartInfo = new ProcessStartInfo {
                     FileName = GetAzureCLIPath(),
                     Arguments = $"resource show --id \"{resourceId}\" --output json",
                     RedirectStandardOutput = true,
@@ -83,8 +68,7 @@ public class AzureCliService
             var error = await process.StandardError.ReadToEndAsync();
             await process.WaitForExitAsync();
 
-            if (process.ExitCode != 0)
-            {
+            if (process.ExitCode != 0) {
                 bool simpleOutput = Environment.GetEnvironmentVariable("SIMPLE_OUTPUT") == "True";
                 Console.WriteLine($"{(simpleOutput ? "[WARN]" : "⚠️")}  Warning: Could not get details for resource {resourceId}: {error}");
                 return null;
@@ -92,31 +76,26 @@ public class AzureCliService
 
             var resourceJson = JObject.Parse(output);
             
-            return new AzureResource
-            {
+            return new AzureResource {
                 Type = resourceJson["type"]?.ToString() ?? "",
                 Name = resourceJson["name"]?.ToString() ?? "",
                 Id = resourceJson["id"]?.ToString() ?? "",
                 Properties = ParseProperties(resourceJson)
             };
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             bool simpleOutput = Environment.GetEnvironmentVariable("SIMPLE_OUTPUT") == "True";
             Console.WriteLine($"{(simpleOutput ? "[WARN]" : "⚠️")}  Warning: Error getting resource details for {resourceId}: {ex.Message}");
             return null;
         }
     }
 
-    private Dictionary<string, object?> ParseProperties(JObject resourceJson)
-    {
+    private Dictionary<string, object?> ParseProperties(JObject resourceJson){
         var properties = new Dictionary<string, object?>();
 
         // Extract key properties that are commonly compared
-        if (resourceJson["properties"] is JObject props)
-        {
-            foreach (var prop in props)
-            {
+        if (resourceJson["properties"] is JObject props){
+            foreach (var prop in props) {
                 properties[$"properties.{prop.Key}"] = ParseJToken(prop.Value);
             }
         }
@@ -136,10 +115,8 @@ public class AzureCliService
         return properties;
     }
 
-    private object? ParseJToken(JToken? token)
-    {
-        return token switch
-        {
+    private object? ParseJToken(JToken? token) {
+        return token switch {
             null => null,
             JValue value => value.Value,
             JObject obj => obj.ToObject<Dictionary<string, object?>>(),
@@ -148,26 +125,21 @@ public class AzureCliService
         };
     }
 
-    private async Task<string> GetReferencedBicepFileAsync(string bicepparamFilePath)
-    {
-        try
-        {
+    private async Task<string> GetReferencedBicepFileAsync(string bicepparamFilePath) {
+        try {
             // Read the bicepparam file to find the 'using' statement
             var content = await File.ReadAllTextAsync(bicepparamFilePath);
             var lines = content.Split('\n');
             
-            foreach (var line in lines)
-            {
+            foreach (var line in lines) {
                 var trimmedLine = line.Trim();
-                if (trimmedLine.StartsWith("using "))
-                {
+                if (trimmedLine.StartsWith("using ")) {
                     // Extract the file path from the using statement
                     var usingPart = trimmedLine.Substring(6).Trim(); // Remove "using "
                     var filePath = usingPart.Trim('\'', '"'); // Remove quotes
                     
                     // If it's a relative path, make it relative to the bicepparam file
-                    if (!Path.IsPathRooted(filePath))
-                    {
+                    if (!Path.IsPathRooted(filePath)) {
                         var bicepparamDir = Path.GetDirectoryName(Path.GetFullPath(bicepparamFilePath)) ?? "";
                         filePath = Path.GetFullPath(Path.Combine(bicepparamDir, filePath));
                     }
@@ -178,14 +150,12 @@ public class AzureCliService
             
             throw new InvalidOperationException($"Could not find 'using' statement in bicepparam file: {bicepparamFilePath}");
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex){
             throw new InvalidOperationException($"Error reading bicepparam file '{bicepparamFilePath}': {ex.Message}", ex);
         }
     }
 
-    private static string GetAzureCLIPath()
-    {
+    private static string GetAzureCLIPath() {
         return AzureCliPathResolver.GetAzureCLIPath();
     }
 
@@ -195,36 +165,30 @@ public class AzureCliService
         DeploymentScope scope,
         string? resourceGroup,
         string? subscription,
-        string? location)
-    {
+        string? location) {
+
         var deploymentName = $"drift-autofix-{DateTime.UtcNow:yyyyMMdd-HHmmss}";
         
-        try
-        {
+        try {
             string arguments;
             
             // Check if this is a bicepparam file or regular bicep file
-            if (Path.GetExtension(bicepFilePath).ToLowerInvariant() == ".bicepparam")
-            {
+            if (Path.GetExtension(bicepFilePath).ToLowerInvariant() == ".bicepparam") {
                 // For bicepparam files, we need to get the referenced bicep file and use parameters
                 var referencedBicepFile = await GetReferencedBicepFileAsync(bicepFilePath);
                 arguments = BuildDeployArguments(scope, referencedBicepFile, bicepFilePath, deploymentName, resourceGroup, subscription, location);
             }
-            else if (!string.IsNullOrEmpty(parametersFilePath))
-            {
+            else if (!string.IsNullOrEmpty(parametersFilePath)){
                 // Using separate parameters file (JSON)
                 arguments = BuildDeployArguments(scope, bicepFilePath, parametersFilePath, deploymentName, resourceGroup, subscription, location);
             }
-            else
-            {
+            else {
                 // Regular bicep file without parameters
                 arguments = BuildDeployArguments(scope, bicepFilePath, null, deploymentName, resourceGroup, subscription, location);
             }
             
-            using var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
+            using var process = new Process {
+                StartInfo = new ProcessStartInfo {
                     FileName = GetAzureCLIPath(),
                     Arguments = arguments,
                     RedirectStandardOutput = true,
@@ -246,28 +210,22 @@ public class AzureCliService
             var output = await outputTask;
             var error = await errorTask;
 
-            if (process.ExitCode == 0)
-            {
-                return new DeploymentResult
-                {
+            if (process.ExitCode == 0){
+                return new DeploymentResult {
                     Success = true,
                     DeploymentName = deploymentName
                 };
             }
-            else
-            {
-                return new DeploymentResult
-                {
+            else{
+                return new DeploymentResult {
                     Success = false,
                     DeploymentName = deploymentName,
                     ErrorMessage = error
                 };
             }
         }
-        catch (Exception ex)
-        {
-            return new DeploymentResult
-            {
+        catch (Exception ex) {
+            return new DeploymentResult {
                 Success = false,
                 DeploymentName = deploymentName,
                 ErrorMessage = ex.Message

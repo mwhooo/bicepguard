@@ -1,5 +1,5 @@
-using BicepGuard.Models;
 using System.CommandLine;
+using BicepGuard.Models;
 
 namespace BicepGuard.CLI;
 
@@ -18,8 +18,10 @@ public static class CommandLineOptions
     {
         var option = new Option<FileInfo>(
             name: "--bicep-file",
-            description: "Path to the Bicep template file (.bicep) or parameters file (.bicepparam)");
-        option.IsRequired = true;
+            description: "Path to the Bicep template file (.bicep) or parameters file (.bicepparam)")
+        {
+            IsRequired = true
+        };
         return option;
     }
 
@@ -31,8 +33,10 @@ public static class CommandLineOptions
     {
         var option = new Option<FileInfo?>(
             aliases: new[] { "--parameters-file", "-p" },
-            description: "Path to ARM JSON parameters file (.json) to use with the Bicep template");
-        option.IsRequired = false;
+            description: "Path to ARM JSON parameters file (.json) to use with the Bicep template")
+        {
+            IsRequired = false
+        };
         return option;
     }
 
@@ -44,8 +48,10 @@ public static class CommandLineOptions
     {
         var option = new Option<DeploymentScope>(
             name: "--scope",
-            description: "Deployment scope: ResourceGroup (default) or Subscription");
-        option.IsRequired = false;
+            description: "Deployment scope: ResourceGroup (default) or Subscription")
+        {
+            IsRequired = false
+        };
         option.SetDefaultValue(DeploymentScope.ResourceGroup);
         return option;
     }
@@ -57,8 +63,10 @@ public static class CommandLineOptions
     {
         var option = new Option<string?>(
             name: "--resource-group",
-            description: "Azure resource group name (required for ResourceGroup scope)");
-        option.IsRequired = false;
+            description: "Azure resource group name (required for ResourceGroup scope)")
+        {
+            IsRequired = false
+        };
         return option;
     }
 
@@ -69,8 +77,10 @@ public static class CommandLineOptions
     {
         var option = new Option<string?>(
             name: "--subscription",
-            description: "Azure subscription ID (required for Subscription scope)");
-        option.IsRequired = false;
+            description: "Azure subscription ID (required for Subscription scope)")
+        {
+            IsRequired = false
+        };
         return option;
     }
 
@@ -81,8 +91,10 @@ public static class CommandLineOptions
     {
         var option = new Option<string?>(
             name: "--location",
-            description: "Azure region for deployment (required for Subscription scope)");
-        option.IsRequired = false;
+            description: "Azure region for deployment (required for Subscription scope)")
+        {
+            IsRequired = false
+        };
         return option;
     }
 
@@ -93,8 +105,10 @@ public static class CommandLineOptions
     {
         var option = new Option<OutputFormat>(
             name: "--output",
-            description: "Output format");
-        option.IsRequired = false;
+            description: "Output format")
+        {
+            IsRequired = false
+        };
         option.SetDefaultValue(OutputFormat.Console);
         return option;
     }
@@ -107,8 +121,10 @@ public static class CommandLineOptions
     {
         var option = new Option<bool>(
             name: "--simple-output",
-            description: "Use simple ASCII characters instead of Unicode symbols");
-        option.IsRequired = false;
+            description: "Use simple ASCII characters instead of Unicode symbols")
+        {
+            IsRequired = false
+        };
         option.SetDefaultValue(false);
         return option;
     }
@@ -121,8 +137,10 @@ public static class CommandLineOptions
     {
         var option = new Option<bool>(
             name: "--autofix",
-            description: "Automatically deploy the Bicep template to fix detected drift");
-        option.IsRequired = false;
+            description: "Automatically deploy the Bicep template to fix detected drift")
+        {
+            IsRequired = false
+        };
         option.SetDefaultValue(false);
         return option;
     }
@@ -136,8 +154,10 @@ public static class CommandLineOptions
     {
         var option = new Option<FileInfo?>(
             name: "--ignore-config",
-            description: "Path to drift ignore configuration file (default: drift-ignore.json)");
-        option.IsRequired = false;
+            description: "Path to drift ignore configuration file (default: drift-ignore.json)")
+        {
+            IsRequired = false
+        };
         return option;
     }
 
@@ -150,8 +170,10 @@ public static class CommandLineOptions
     {
         var option = new Option<bool>(
             name: "--show-filtered",
-            description: "Show details of filtered/ignored drifts for auditing purposes");
-        option.IsRequired = false;
+            description: "Show details of filtered/ignored drifts for auditing purposes")
+        {
+            IsRequired = false
+        };
         option.SetDefaultValue(false);
         return option;
     }
