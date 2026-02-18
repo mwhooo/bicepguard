@@ -82,7 +82,7 @@ benchmark/
 ### 1. Create a Resource Group
 
 ```bash
-az group create --name driftguard-benchmark-rg --location westeurope
+az group create --name bicepguard-benchmark-rg --location westeurope
 ```
 
 ### 2. Run the Benchmark
@@ -92,16 +92,16 @@ cd benchmark
 chmod +x run-benchmark.sh
 
 # Run all tools with 3 iterations (default)
-./run-benchmark.sh -g driftguard-benchmark-rg
+./run-benchmark.sh -g bicepguard-benchmark-rg
 
 # Run specific tools
-./run-benchmark.sh -g driftguard-benchmark-rg -t bicep,terraform
+./run-benchmark.sh -g bicepguard-benchmark-rg -t bicep,terraform
 
 # Run with more iterations
-./run-benchmark.sh -g driftguard-benchmark-rg -i 5
+./run-benchmark.sh -g bicepguard-benchmark-rg -i 5
 
 # Skip resource destruction (for debugging)
-./run-benchmark.sh -g driftguard-benchmark-rg --skip-destroy
+./run-benchmark.sh -g bicepguard-benchmark-rg --skip-destroy
 ```
 
 ### 3. View Results
@@ -136,12 +136,12 @@ cd ../samples
 
 # Deploy
 az deployment group create \
-  --resource-group driftguard-benchmark-rg \
+  --resource-group bicepguard-benchmark-rg \
   --template-file main-template.bicep \
   --parameters main-template.bicepparam
 
 # Destroy
-az group delete --name driftguard-benchmark-rg --yes
+az group delete --name bicepguard-benchmark-rg --yes
 ```
 
 ### Terraform
@@ -182,7 +182,7 @@ pulumi stack init benchmark
 pulumi stack select benchmark
 
 # Configure
-pulumi config set resourceGroupName driftguard-benchmark-rg
+pulumi config set resourceGroupName bicepguard-benchmark-rg
 pulumi config set azure-native:location westeurope
 
 # Deploy
@@ -203,7 +203,7 @@ deactivate
 {
   "benchmark_info": {
     "timestamp": "20260122_143022",
-    "resource_group": "driftguard-benchmark-rg",
+    "resource_group": "bicepguard-benchmark-rg",
     "location": "westeurope",
     "iterations": 3
   },
