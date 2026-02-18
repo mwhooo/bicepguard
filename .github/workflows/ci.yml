@@ -44,14 +44,14 @@ jobs:
       run: dotnet build --no-restore --configuration Release
       
     - name: 🧪 Run unit tests
-      run: dotnet test tests/DriftGuard.Tests/BicepGuard.Tests.csproj --no-build --configuration Release --logger "trx;LogFileName=test-results.trx" --verbosity normal
+      run: dotnet test tests/BicepGuard.Tests/BicepGuard.Tests.csproj --no-build --configuration Release --logger "trx;LogFileName=test-results.trx" --verbosity normal
       
     - name: 📊 Upload test results
       uses: actions/upload-artifact@v6
       if: always()
       with:
         name: test-results
-        path: tests/DriftGuard.Tests/TestResults/
+        path: tests/BicepGuard.Tests/TestResults/
         retention-days: 30
       continue-on-error: true
       
