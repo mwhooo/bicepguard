@@ -7,53 +7,6 @@ public class BicepService
 {
     private const int MaxRecursionDepth = 10; // we might want to expose this as an external configuration.
 
-    private JObject ResolveTemplateParameters(JObject armTemplate, JObject parametersJson)
-    {
-        try
-        {
-            // Get the parameters section from the parameters JSON file
-            var parameterValues = new Dictionary<string, JToken>();
-            
-            var parameters = parametersJson["parameters"] as JObject;
-            if (parameters != null)
-            {
-                foreach (var param in parameters)
-                {
-                    var value = param.Value?["value"];
-                    if (value != null)
-                    {
-                        parameterValues[param.Key] = value;
-                    }
-                }
-            }
-
-            // Create a deep copy to avoid modifying the original
-            var resolvedTemplate = (JObject)armTemplate.DeepClone();
-            
-            // Update the parameters section with the resolved values
-            if (resolvedTemplate["parameters"] is JObject templateParams)
-            {
-                foreach (var param in templateParams.Properties().Where(p => parameterValues.ContainsKey(p.Name)).ToList())
-                {
-                    var paramValue = parameterValues[param.Name];
-                    // Update the parameter with the resolved value
-                    var paramObj = param.Value as JObject;
-                    if (paramObj != null)
-                    {
-                        paramObj["defaultValue"] = paramValue;
-                    }
-                }
-            }
-
-            return resolvedTemplate;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"⚠️  Warning: Could not resolve template parameters: {ex.Message}");
-            return armTemplate; // Return original template if resolution fails
-        }
-    }
-
     public List<JObject> ExtractResourcesFromTemplate(JObject armTemplate)
     {
         var resources = new List<JObject>();
