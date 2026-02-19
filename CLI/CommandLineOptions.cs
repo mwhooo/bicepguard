@@ -16,11 +16,10 @@ public static class CommandLineOptions
     /// </summary>
     public static Option<FileInfo> CreateBicepFileOption()
     {
-        var option = new Option<FileInfo>(
-            name: "--bicep-file",
-            description: "Path to the Bicep template file (.bicep) or parameters file (.bicepparam)")
+        var option = new Option<FileInfo>("--bicep-file")
         {
-            IsRequired = true
+            Description = "Path to the Bicep template file (.bicep) or parameters file (.bicepparam)",
+            Required = true
         };
         return option;
     }
@@ -31,11 +30,10 @@ public static class CommandLineOptions
     /// </summary>
     public static Option<FileInfo?> CreateParametersFileOption()
     {
-        var option = new Option<FileInfo?>(
-            aliases: new[] { "--parameters-file", "-p" },
-            description: "Path to ARM JSON parameters file (.json) to use with the Bicep template")
+        var option = new Option<FileInfo?>("--parameters-file", "-p")
         {
-            IsRequired = false
+            Description = "Path to ARM JSON parameters file (.json) to use with the Bicep template",
+            Required = false
         };
         return option;
     }
@@ -46,13 +44,12 @@ public static class CommandLineOptions
     /// </summary>
     public static Option<DeploymentScope> CreateScopeOption()
     {
-        var option = new Option<DeploymentScope>(
-            name: "--scope",
-            description: "Deployment scope: ResourceGroup (default) or Subscription")
+        var option = new Option<DeploymentScope>("--scope")
         {
-            IsRequired = false
+            Description = "Deployment scope: ResourceGroup (default) or Subscription",
+            Required = false,
+            DefaultValueFactory = (_) => DeploymentScope.ResourceGroup
         };
-        option.SetDefaultValue(DeploymentScope.ResourceGroup);
         return option;
     }
 
@@ -61,11 +58,10 @@ public static class CommandLineOptions
     /// </summary>
     public static Option<string?> CreateResourceGroupOption()
     {
-        var option = new Option<string?>(
-            name: "--resource-group",
-            description: "Azure resource group name (required for ResourceGroup scope)")
+        var option = new Option<string?>("--resource-group")
         {
-            IsRequired = false
+            Description = "Azure resource group name (required for ResourceGroup scope)",
+            Required = false
         };
         return option;
     }
@@ -75,11 +71,10 @@ public static class CommandLineOptions
     /// </summary>
     public static Option<string?> CreateSubscriptionOption()
     {
-        var option = new Option<string?>(
-            name: "--subscription",
-            description: "Azure subscription ID (required for Subscription scope)")
+        var option = new Option<string?>("--subscription")
         {
-            IsRequired = false
+            Description = "Azure subscription ID (required for Subscription scope)",
+            Required = false
         };
         return option;
     }
@@ -89,11 +84,10 @@ public static class CommandLineOptions
     /// </summary>
     public static Option<string?> CreateLocationOption()
     {
-        var option = new Option<string?>(
-            name: "--location",
-            description: "Azure region for deployment (required for Subscription scope)")
+        var option = new Option<string?>("--location")
         {
-            IsRequired = false
+            Description = "Azure region for deployment (required for Subscription scope)",
+            Required = false
         };
         return option;
     }
@@ -103,13 +97,12 @@ public static class CommandLineOptions
     /// </summary>
     public static Option<OutputFormat> CreateOutputFormatOption()
     {
-        var option = new Option<OutputFormat>(
-            name: "--output",
-            description: "Output format")
+        var option = new Option<OutputFormat>("--output")
         {
-            IsRequired = false
+            Description = "Output format",
+            Required = false,
+            DefaultValueFactory = (_) => OutputFormat.Console
         };
-        option.SetDefaultValue(OutputFormat.Console);
         return option;
     }
 
@@ -119,13 +112,12 @@ public static class CommandLineOptions
     /// </summary>
     public static Option<bool> CreateSimpleOutputOption()
     {
-        var option = new Option<bool>(
-            name: "--simple-output",
-            description: "Use simple ASCII characters instead of Unicode symbols")
+        var option = new Option<bool>("--simple-output")
         {
-            IsRequired = false
+            Description = "Use simple ASCII characters instead of Unicode symbols",
+            Required = false,
+            DefaultValueFactory = (_) => false
         };
-        option.SetDefaultValue(false);
         return option;
     }
 
@@ -135,13 +127,12 @@ public static class CommandLineOptions
     /// </summary>
     public static Option<bool> CreateAutofixOption()
     {
-        var option = new Option<bool>(
-            name: "--autofix",
-            description: "Automatically deploy the Bicep template to fix detected drift")
+        var option = new Option<bool>("--autofix")
         {
-            IsRequired = false
+            Description = "Automatically deploy the Bicep template to fix detected drift",
+            Required = false,
+            DefaultValueFactory = (_) => false
         };
-        option.SetDefaultValue(false);
         return option;
     }
 
@@ -152,11 +143,10 @@ public static class CommandLineOptions
     /// </summary>
     public static Option<FileInfo?> CreateIgnoreConfigOption()
     {
-        var option = new Option<FileInfo?>(
-            name: "--ignore-config",
-            description: "Path to drift ignore configuration file (default: drift-ignore.json)")
+        var option = new Option<FileInfo?>("--ignore-config")
         {
-            IsRequired = false
+            Description = "Path to drift ignore configuration file (default: drift-ignore.json)",
+            Required = false
         };
         return option;
     }
@@ -168,13 +158,12 @@ public static class CommandLineOptions
     /// </summary>
     public static Option<bool> CreateShowFilteredOption()
     {
-        var option = new Option<bool>(
-            name: "--show-filtered",
-            description: "Show details of filtered/ignored drifts for auditing purposes")
+        var option = new Option<bool>("--show-filtered")
         {
-            IsRequired = false
+            Description = "Show details of filtered/ignored drifts for auditing purposes",
+            Required = false,
+            DefaultValueFactory = (_) => false
         };
-        option.SetDefaultValue(false);
         return option;
     }
 }

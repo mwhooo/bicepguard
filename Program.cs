@@ -14,6 +14,6 @@ internal class Program {
         // Instantiate the command handler and build the root command
         var command = new BicepGuardCommand();
         var rootCommand = command.BuildRootCommand();
-        return await rootCommand.InvokeAsync(args);
+        return await rootCommand.Parse(args).InvokeAsync();
     }
 }
