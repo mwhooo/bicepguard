@@ -234,7 +234,7 @@ Drifted Resources:
   - properties.allowBlobPublicAccess: Expected false, Actual true
 ```
 
-## � Monitoring Features
+## 📊 Monitoring Features
 
 ### ✅ When No Drift Detected
 - Runs silently (unless manually triggered)
@@ -313,7 +313,7 @@ gh workflow run drift-monitoring.yml
 gh run watch
 ```
 
-## �🔄 Migration from Standalone Monitoring
+## 🔄 Migration from Standalone Monitoring  
 
 If you're currently running BicepGuard manually or with a custom workflow:
 
