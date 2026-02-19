@@ -2,13 +2,13 @@ using System.Diagnostics;
 
 namespace BicepGuard.Services;
 
-public static class AzureCliPathResolver
-{
+public static class AzureCliPathResolver {
     private const int AzCliVersionCheckTimeoutMs = 5000;
 
-    /// </summary>
+    /// <summary>
     /// <returns>The path to the Azure CLI executable.</returns>
     /// <exception cref="InvalidOperationException">Thrown when Azure CLI cannot be found.</exception>
+    /// </summary>
     public static string GetAzureCLIPath() {
         // On Linux/Docker, just use 'az' from PATH, since it should be installed as mentioned in the readme
         if (Environment.OSVersion.Platform == PlatformID.Unix) {
