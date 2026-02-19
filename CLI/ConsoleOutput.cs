@@ -1,5 +1,5 @@
-using BicepGuard.Models;
 using System.Reflection;
+using BicepGuard.Models;
 
 namespace BicepGuard.CLI;
 
@@ -23,14 +23,6 @@ public static class ConsoleOutput
     public static void WriteSuccess(string message, bool simpleOutput)
     {
         Console.WriteLine($"{(simpleOutput ? "[OK]" : "✅")} {message}");
-    }
-
-    /// <summary>
-    /// Writes an info message to the console.
-    /// </summary>
-    public static void WriteInfo(string message, bool simpleOutput)
-    {
-        Console.WriteLine($"{(simpleOutput ? "[INFO]" : "🔍")} {message}");
     }
 
     /// <summary>

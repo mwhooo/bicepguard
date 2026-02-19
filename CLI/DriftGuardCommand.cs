@@ -1,7 +1,6 @@
+using System.CommandLine;
 using BicepGuard.Core;
 using BicepGuard.Models;
-using System.CommandLine;
-using System.CommandLine.Invocation;
 
 namespace BicepGuard.CLI;
 
@@ -72,9 +71,9 @@ public class BicepGuardCommand
         rootCommand.Add(_showFilteredOption);
 
         // Set the handler - captures 'this' to access instance methods and properties
-        rootCommand.SetHandler(async (context) =>
+        rootCommand.SetAction(async (parseResult, cancellationToken) =>
         {
-            await HandleCommandAsync(context);
+            await HandleCommandAsync(parseResult);
         });
 
         return rootCommand;
@@ -83,20 +82,20 @@ public class BicepGuardCommand
     /// <summary>
     /// Handles the command execution logic.
     /// </summary>
-    private async Task HandleCommandAsync(InvocationContext context)
+    private async Task HandleCommandAsync(ParseResult parseResult)
     {
         // Extract all option values into properties
-        BicepFile = context.ParseResult.GetValueForOption(_bicepFileOption!)!;
-        ParametersFile = context.ParseResult.GetValueForOption(_parametersFileOption!);
-        Scope = context.ParseResult.GetValueForOption(_scopeOption!);
-        ResourceGroup = context.ParseResult.GetValueForOption(_resourceGroupOption!);
-        Subscription = context.ParseResult.GetValueForOption(_subscriptionOption!);
-        Location = context.ParseResult.GetValueForOption(_locationOption!);
-        OutputFormat = context.ParseResult.GetValueForOption(_outputFormatOption!);
-        SimpleOutput = context.ParseResult.GetValueForOption(_simpleOutputOption!);
-        Autofix = context.ParseResult.GetValueForOption(_autofixOption!);
-        IgnoreConfig = context.ParseResult.GetValueForOption(_ignoreConfigOption!);
-        ShowFiltered = context.ParseResult.GetValueForOption(_showFilteredOption!);
+        BicepFile = parseResult.GetValue(_bicepFileOption!)!;
+        ParametersFile = parseResult.GetValue(_parametersFileOption!);
+        Scope = parseResult.GetValue(_scopeOption!);
+        ResourceGroup = parseResult.GetValue(_resourceGroupOption!);
+        Subscription = parseResult.GetValue(_subscriptionOption!);
+        Location = parseResult.GetValue(_locationOption!);
+        OutputFormat = parseResult.GetValue(_outputFormatOption!);
+        SimpleOutput = parseResult.GetValue(_simpleOutputOption!);
+        Autofix = parseResult.GetValue(_autofixOption!);
+        IgnoreConfig = parseResult.GetValue(_ignoreConfigOption!);
+        ShowFiltered = parseResult.GetValue(_showFilteredOption!);
 
         try
         {

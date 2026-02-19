@@ -234,7 +234,86 @@ Drifted Resources:
   - properties.allowBlobPublicAccess: Expected false, Actual true
 ```
 
-## 🔄 Migration from Standalone Monitoring
+## 📊 Monitoring Features
+
+### ✅ When No Drift Detected
+- Runs silently (unless manually triggered)
+- Closes any existing drift issues
+- Logs success in workflow summary
+
+### 🚨 When Drift Detected
+- Creates GitHub issue with details
+- Uploads JSON and HTML reports
+- Updates existing issues with new findings
+- Sets workflow status to failed
+
+### 📋 Reports and Artifacts
+- **JSON reports**: Machine-readable drift details
+- **HTML reports**: Human-friendly visualization
+- **Workflow logs**: Detailed execution information
+- **Issues**: Trackable drift alerts with remediation steps
+
+## 🔧 Monitoring Customization
+
+### Environment Configuration
+```yaml
+strategy:
+  matrix:
+    environment: 
+      - { name: 'dev', resource_group: 'my-dev-rg' }
+      - { name: 'prod', resource_group: 'my-prod-rg' }
+```
+
+### Monitoring Schedule
+Change how frequently drift detection runs:
+
+```yaml
+schedule:
+  # Every 6 hours
+  - cron: '0 */6 * * *'
+  # Daily at 9 AM UTC
+  - cron: '0 9 * * *'
+  # Business hours only (Mon-Fri 9-17 UTC)
+  - cron: '0 9-17 * * 1-5'
+```
+
+### Issue Management
+- **Automatic Issue Creation**: New issues for first-time drift
+- **Updates**: Comments added for ongoing drift
+- **Resolution**: Issues closed when drift resolved
+- **Prevention**: Monitoring continues to prevent regression
+
+### Best Practices
+- **Production**: Set up notification webhooks for critical drift
+- **Development**: Review drift issues during daily standups
+- **Change Management**: Use pull requests to track infrastructure changes
+- **Documentation**: Document any temporary drift exceptions
+
+### Troubleshooting Monitoring Issues
+| Issue | Solution |
+|-------|----------|
+| Permission errors | Ensure service principal has Reader access to resource group |
+| Resource not found | Check resource group names and regions match your configuration |
+| Template validation errors | Validate Bicep syntax and parameter file completeness |
+| Missing reports | Verify workflow has write permissions to create issues and upload artifacts |
+
+### Debug Monitoring
+```bash
+# Test locally with same settings
+docker run --rm \
+  -v ~/.azure:/root/.azure \
+  -v $(pwd):/workspace \
+  mwhooo/bicepguard:latest \
+  --bicep-file template.bicepparam \
+  --resource-group myRG \
+  --simple-output
+
+# Manually trigger workflow
+gh workflow run drift-monitoring.yml
+gh run watch
+```
+
+## 🔄 Migration from Standalone Monitoring  
 
 If you're currently running BicepGuard manually or with a custom workflow:
 
@@ -265,7 +344,7 @@ gh run watch
 
 ## 📚 Additional Resources
 
-- [Drift Ignore Configuration](DRIFT-IGNORE.md) - Complete ignore pattern reference
-- [OIDC Authentication Setup](OIDC-SETUP.md) - Detailed Azure OIDC guide
-- [Monitoring Best Practices](MONITORING.md) - Tips for effective monitoring
-- [Main Documentation](../README.md) - Full BicepGuard documentation
+- [Drift Ignore Configuration](DRIFT-IGNORE.md) - Configure ignore rules and suppress false positives
+- [Docker Usage Guide](DOCKER.md) - Run BicepGuard as a container
+- [OIDC Authentication Setup](OIDC-SETUP.md) - Secure authentication with Azure
+- [Main Documentation](../README.md) - Full BicepGuard documentation and links

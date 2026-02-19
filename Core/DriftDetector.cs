@@ -5,19 +5,15 @@ namespace BicepGuard.Core;
 
 public class DriftDetector
 {
-    private readonly BicepService _bicepService;
     private readonly AzureCliService _azureCliService;
-    private readonly ComparisonService _comparisonService;
     private readonly ReportingService _reportingService;
     private readonly DriftIgnoreService? _ignoreService;
     private readonly WhatIfJsonService _whatIfJsonService;
 
     public DriftDetector(string? ignoreConfigPath = null)
     {
-        _bicepService = new BicepService();
         _azureCliService = new AzureCliService();
         _ignoreService = !string.IsNullOrEmpty(ignoreConfigPath) ? new DriftIgnoreService(ignoreConfigPath) : new DriftIgnoreService();
-        _comparisonService = new ComparisonService(_ignoreService);
         _reportingService = new ReportingService();
         _whatIfJsonService = new WhatIfJsonService(_ignoreService);
     }
@@ -69,15 +65,6 @@ public class DriftDetector
             Console.WriteLine($"❌ Error during drift detection: {ex.Message}");
             throw;
         }
-    }
-
-    // Backward compatibility overload for resource-group scope
-    public Task<DriftDetectionResult> DetectDriftAsync(
-        FileInfo bicepFile, 
-        string resourceGroup, 
-        OutputFormat outputFormat = OutputFormat.Console)
-    {
-        return DetectDriftAsync(bicepFile, null, DeploymentScope.ResourceGroup, resourceGroup, null, null, outputFormat);
     }
 
     public async Task<DeploymentResult> DeployTemplateAsync(
@@ -161,9 +148,4 @@ public class DriftDetector
         }
     }
 
-    // Backward compatibility overload for resource-group scope
-    public Task<DeploymentResult> DeployTemplateAsync(FileInfo bicepFile, string resourceGroup)
-    {
-        return DeployTemplateAsync(bicepFile, null, DeploymentScope.ResourceGroup, resourceGroup, null, null);
-    }
 }

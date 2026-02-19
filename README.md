@@ -50,7 +50,7 @@ BicepGuard helps maintain **IaC compliance** by identifying these deviations qui
 - **Pattern Matching**: Flexible property path matching with wildcards and nested object support
 - **Clear Feedback**: Visual indicators showing which drifts are being ignored and why
 
-📖 **[Complete Drift Ignore Documentation](docs/DRIFT-IGNORE.md)** - Comprehensive guide with examples and best practices
+📖 **[Complete Drift Ignore Documentation](docs/DRIFT-IGNORE.md)** - guide with examples and best practices
 
 ## 🚀 Quick Start
 
@@ -308,7 +308,7 @@ docker run --rm \
   --simple-output
 ```
 
-> 📖 **Need to configure drift ignore rules?** See our comprehensive [Drift Ignore Configuration Guide](docs/DRIFT-IGNORE.md) with examples for common Azure services and best practices.
+> 📖 **Need to configure drift ignore rules?** See our [Drift Ignore Configuration Guide](docs/DRIFT-IGNORE.md) with examples for common Azure services and best practices.
 
 ## 📋 Example Scenarios
 
@@ -548,7 +548,7 @@ module private 'br:private.azurecr.io/modules/networking/vnet:latest' = { ... }
 - **Mixed Templates**: Supports templates combining external modules with direct resources
 
 #### AVM Noise Suppression
-Azure Verified Modules often set compliance properties that differ from Azure defaults, creating false positive drift alerts. The tool includes comprehensive ignore patterns:
+Azure Verified Modules often set compliance properties that differ from Azure defaults, creating false positive drift alerts. The tool includes ignore patterns:
 
 ```json
 {
@@ -725,7 +725,7 @@ az deployment group what-if --resource-group dev --template-file samples/main-te
 This provides:
 - ✅ **Azure-Native Comparison**: Uses Azure's deployment engine for drift detection
 - ✅ **Intelligent Noise Suppression**: Filters Azure platform behaviors with configurable ignore patterns
-- ✅ **Comprehensive Analysis**: Detects most configuration changes across resource types
+- ✅ **Analysis**: Detects most configuration changes across resource types
 - ✅ **Clean Output**: Verbose what-if output suppressed, showing only formatted drift results
 
 ## 🎨 Sample Output
@@ -800,7 +800,7 @@ This project uses GitHub's security features to ensure code quality and security
 **Note**: For private repositories, GitHub Advanced Security requires enabling through repository settings. See [Security Setup Guide](docs/SECURITY-SETUP.md) for detailed instructions.
 
 ### Automated CI/CD Pipeline
-Every push triggers comprehensive validation:
+Every push triggers validation:
 - ✅ Cross-platform builds (Ubuntu, macOS, Windows)
 - ✅ Code quality and formatting checks
 - ✅ Bicep template validation
@@ -846,7 +846,7 @@ BicepGuard/
 │   ├── log-analytics-workspace.bicep
 │   └── key-vault.bicep
 ├── docs/                          # Documentation
-│   ├── DRIFT-IGNORE.md           # Comprehensive drift ignore configuration guide
+│   ├── DRIFT-IGNORE.md           # drift ignore configuration guide
 │   ├── SECURITY-SETUP.md         # GitHub Advanced Security setup
 │   └── BICEP-BUILD.md            # Bicep module development guide
 ├── drift-ignore.json              # Default ignore configuration for Azure platform noise
@@ -935,7 +935,7 @@ Suitable for CI/CD pipelines and infrastructure validation workflows.
 
 ## 📝 Changelog
 
-### v3.2.0 (2025-11-15) - Comprehensive Drift Ignore System 🔇
+### v3.2.0 (2025-11-15) - Drift Ignore System 🔇
 **Noise Reduction**
 
 #### 🔇 **Drift Ignore System**
@@ -960,7 +960,7 @@ Suitable for CI/CD pipelines and infrastructure validation workflows.
 #### 🛠️ **Technical Architecture**
 - 🆕 **DriftIgnoreService**: New service for pattern matching and drift filtering
 - 🔧 **Enhanced ComparisonService**: Integrated ignore filtering with what-if parsing
-- 📚 **Updated Documentation**: Comprehensive ignore configuration guide and best practices
+- 📚 **Updated Documentation**: ignore configuration guide and best practices
 
 ### v3.0.0 (2025-11-13) - Major Architecture Overhaul 🚀
 **Breaking Changes - Major Release**
@@ -1015,7 +1015,7 @@ Suitable for CI/CD pipelines and infrastructure validation workflows.
 - 🔍 **Smart Array Detection**: Automatic detection and specialized comparison for different array types
 - ⚡ **Performance Optimizations**: More efficient comparison algorithms for complex nested objects
 - 📊 **Enhanced Reporting**: Better formatting for console output with base JSON formatting
-- 🧪 **Comprehensive Testing**: Validated with real Azure resources across multiple resource types
+- 🧪 **Testing**: Validated with real Azure resources across multiple resource types
 
 ### Previous Versions
 - v2.0.0 - Initial stable release with multi-resource support

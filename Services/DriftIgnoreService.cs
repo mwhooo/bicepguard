@@ -184,12 +184,6 @@ public class DriftIgnoreService
         }
     }
 
-    private bool ShouldIgnorePropertyDrift(ResourceDrift resourceDrift, PropertyDrift propertyDrift)
-    {
-        var (shouldIgnore, _) = ShouldIgnorePropertyDriftWithReason(resourceDrift, propertyDrift);
-        return shouldIgnore;
-    }
-
     private (bool shouldIgnore, string reason) ShouldIgnorePropertyDriftWithReason(ResourceDrift resourceDrift, PropertyDrift propertyDrift)
     {
         // Check if this is an empty/structural comparison - not meaningful drift
@@ -334,48 +328,4 @@ public class DriftIgnoreService
         return expectedEmpty && actualEmpty;
     }
 
-    public void AddIgnoreRule(string resourceType, string propertyPath, string reason)
-    {
-        // Find existing rule or create new one
-        var existingRule = _ignoreConfig.IgnorePatterns.Resources
-            .FirstOrDefault(r => string.Equals(r.ResourceType, resourceType, StringComparison.OrdinalIgnoreCase));
-
-        if (existingRule != null)
-        {
-            if (!existingRule.IgnoredProperties.Contains(propertyPath, StringComparer.OrdinalIgnoreCase))
-            {
-                existingRule.IgnoredProperties.Add(propertyPath);
-            }
-        }
-        else
-        {
-            _ignoreConfig.IgnorePatterns.Resources.Add(new ResourceIgnoreRule
-            {
-                ResourceType = resourceType,
-                Reason = reason,
-                IgnoredProperties = [propertyPath]
-            });
-        }
-    }
-
-    public void SaveIgnoreConfiguration(string? configPath = null)
-    {
-        try
-        {
-            configPath ??= Path.Combine(Directory.GetCurrentDirectory(), "drift-ignore.json");
-            
-            var json = JsonSerializer.Serialize(_ignoreConfig, new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
-
-            File.WriteAllText(configPath, json);
-            Console.WriteLine($"💾 Saved ignore configuration to: {configPath}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"⚠️  Error saving ignore configuration: {ex.Message}");
-        }
-    }
 }
