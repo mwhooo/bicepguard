@@ -64,7 +64,6 @@ public static class ConsoleOutput
         string? subscription,
         string? location,
         OutputFormat outputFormat,
-        bool autofix,
         FileInfo? ignoreConfig,
         bool showFiltered,
         bool simpleOutput)
@@ -95,10 +94,6 @@ public static class ConsoleOutput
 
         Console.WriteLine($"{(simpleOutput ? "[OUTPUT]" : "📊")} Output Format: {outputFormat}");
 
-        if (autofix)
-        {
-            Console.WriteLine($"{(simpleOutput ? "[AUTOFIX]" : "🔧")} Autofix Mode: ENABLED");
-        }
 
         // Show ignore config path being used
         var ignoreConfigPath = ignoreConfig?.FullName ?? Path.Join(Directory.GetCurrentDirectory(), "drift-ignore.json");
