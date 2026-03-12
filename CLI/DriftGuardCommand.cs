@@ -100,7 +100,6 @@ public class BicepGuardCommand
         Location = parseResult.GetValue(_locationOption!);
         OutputFormat = parseResult.GetValue(_outputFormatOption!);
         SimpleOutput = parseResult.GetValue(_simpleOutputOption!);
-        // Autofix = parseResult.GetValue(_autofixOption!);
         IgnoreConfig = parseResult.GetValue(_ignoreConfigOption!);
         ShowFiltered = parseResult.GetValue(_showFilteredOption!);
 
@@ -143,7 +142,7 @@ public class BicepGuardCommand
                 OutputFormat);
 
             // Handle results
-            HandleDriftResultAsync(result, detector);
+            HandleDriftResult(result, detector);
         }
         catch (InvalidOperationException)
         {
@@ -208,14 +207,15 @@ public class BicepGuardCommand
     }
 
     /// <summary>
-    /// Handles the drift detection result and autofix if requested.
+    /// Handles the drift detection result by reporting the outcome and exiting with an appropriate status code.
+    /// Autofix is currently not performed.
     /// </summary>
-    private void HandleDriftResultAsync(DriftDetectionResult result, DriftDetector detector)
+    private void HandleDriftResult(DriftDetectionResult result, DriftDetector detector)
     {
         if (result.HasDrift)
         {
             ConsoleOutput.WriteWarning("Configuration drift detected!", SimpleOutput);
-
+            Environment.Exit(0); // we dont want any non zero exit codes on drift. since we using this in pipelines.
             //if (Autofix)
             //{
             //    ConsoleOutput.WriteAutofixAttempt(SimpleOutput);

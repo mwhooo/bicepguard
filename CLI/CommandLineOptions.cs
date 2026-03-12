@@ -9,29 +9,33 @@ namespace BicepGuard.CLI;
 /// </summary>
 public static class CommandLineOptions
 {
-    // AI assisted me in setting up this class, but for me it does not feel DRY enough, creating a new signatures for this overload.
-    // i think 2 overloads would do instead of 10 signatures
-    public static Option<FileInfo> CreateFileOptionFlexible(string opt, string desc, bool required) {
-        var option = new Option<FileInfo>(opt) {
+    public static Option<FileInfo> CreateFileOptionFlexible(string opt, string desc, bool required) 
+    {
+        var option = new Option<FileInfo>(opt) 
+        {
             Description = desc,
             Required = required
-         };
-         return option;
+        };
+        return option;
     }
 
-    public static Option<FileInfo?> CreateFileOptionFlexible(string opt, string desc, bool required, string alias) {
-        var option = new Option<FileInfo?>(opt, alias) {
+    public static Option<FileInfo?> CreateFileOptionFlexible(string opt, string desc, bool required, string alias) 
+    {
+        var option = new Option<FileInfo?>(opt, alias) 
+        {
             Description = desc,
             Required = required
-         };
-         return option;
+        };
+        return option;
     }
 
-    public static Option<string?> CreateStringOptionFlexible(string opt, string desc, bool required) {
-        var option = new Option<string?>(opt) {
+    public static Option<string?> CreateStringOptionFlexible(string opt, string desc, bool required) 
+    {
+        var option = new Option<string?>(opt) 
+        {
             Description = desc,
             Required = required
-         };
+        };
          return option;
     }
 
