@@ -9,34 +9,36 @@ namespace BicepGuard.CLI;
 /// </summary>
 public static class CommandLineOptions
 {
-    /// <summary>
-    /// Creates the Bicep file option (accepts both .bicep and .bicepparam files).
-    /// Bicepparam has a using statement on top which refers to the bicep file,
-    /// so we don't need to specify the bicep file separately if we use a bicepparam file.
-    /// </summary>
-    public static Option<FileInfo> CreateBicepFileOption()
+    public static Option<FileInfo> CreateFileOptionFlexible(string opt, string desc, bool required) 
     {
-        var option = new Option<FileInfo>("--bicep-file")
+        var option = new Option<FileInfo>(opt) 
         {
-            Description = "Path to the Bicep template file (.bicep) or parameters file (.bicepparam)",
-            Required = true
+            Description = desc,
+            Required = required
         };
         return option;
     }
 
-    /// <summary>
-    /// Creates the parameters file option for JSON parameter files.
-    /// Supports both --parameters-file and -p as a shorthand.
-    /// </summary>
-    public static Option<FileInfo?> CreateParametersFileOption()
+    public static Option<FileInfo?> CreateFileOptionFlexible(string opt, string desc, bool required, string alias) 
     {
-        var option = new Option<FileInfo?>("--parameters-file", "-p")
+        var option = new Option<FileInfo?>(opt, alias) 
         {
-            Description = "Path to ARM JSON parameters file (.json) to use with the Bicep template",
-            Required = false
+            Description = desc,
+            Required = required
         };
         return option;
     }
+
+    public static Option<string?> CreateStringOptionFlexible(string opt, string desc, bool required) 
+    {
+        var option = new Option<string?>(opt) 
+        {
+            Description = desc,
+            Required = required
+        };
+         return option;
+    }
+
 
     /// <summary>
     /// Creates the deployment scope option.
@@ -49,45 +51,6 @@ public static class CommandLineOptions
             Description = "Deployment scope: ResourceGroup (default) or Subscription",
             Required = false,
             DefaultValueFactory = (_) => DeploymentScope.ResourceGroup
-        };
-        return option;
-    }
-
-    /// <summary>
-    /// Creates the resource group option (required for ResourceGroup scope).
-    /// </summary>
-    public static Option<string?> CreateResourceGroupOption()
-    {
-        var option = new Option<string?>("--resource-group")
-        {
-            Description = "Azure resource group name (required for ResourceGroup scope)",
-            Required = false
-        };
-        return option;
-    }
-
-    /// <summary>
-    /// Creates the subscription option (required for Subscription scope).
-    /// </summary>
-    public static Option<string?> CreateSubscriptionOption()
-    {
-        var option = new Option<string?>("--subscription")
-        {
-            Description = "Azure subscription ID (required for Subscription scope)",
-            Required = false
-        };
-        return option;
-    }
-
-    /// <summary>
-    /// Creates the location option (required for Subscription scope deployments).
-    /// </summary>
-    public static Option<string?> CreateLocationOption()
-    {
-        var option = new Option<string?>("--location")
-        {
-            Description = "Azure region for deployment (required for Subscription scope)",
-            Required = false
         };
         return option;
     }
@@ -115,21 +78,6 @@ public static class CommandLineOptions
         var option = new Option<bool>("--simple-output")
         {
             Description = "Use simple ASCII characters instead of Unicode symbols",
-            Required = false,
-            DefaultValueFactory = (_) => false
-        };
-        return option;
-    }
-
-    /// <summary>
-    /// Creates the autofix option to deploy template when drift is detected.
-    /// Note: Consider using CI/CD or GitOps approach instead for production.
-    /// </summary>
-    public static Option<bool> CreateAutofixOption()
-    {
-        var option = new Option<bool>("--autofix")
-        {
-            Description = "Automatically deploy the Bicep template to fix detected drift",
             Required = false,
             DefaultValueFactory = (_) => false
         };

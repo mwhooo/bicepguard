@@ -18,7 +18,6 @@ public class BicepGuardCommand
     private Option<string?>? _locationOption;
     private Option<OutputFormat>? _outputFormatOption;
     private Option<bool>? _simpleOutputOption;
-    private Option<bool>? _autofixOption;
     private Option<FileInfo?>? _ignoreConfigOption;
     private Option<bool>? _showFilteredOption;
 
@@ -31,7 +30,6 @@ public class BicepGuardCommand
     public string? Location { get; set; }
     public OutputFormat OutputFormat { get; set; }
     public bool SimpleOutput { get; set; }
-    public bool Autofix { get; set; }
     public FileInfo? IgnoreConfig { get; set; }
     public bool ShowFiltered { get; set; }
 
@@ -45,17 +43,27 @@ public class BicepGuardCommand
             Description = "Detects configuration drift between Bicep/ARM templates and live Azure resources"
         };
 
-        // Store options as instance fields for use in the handler
-        _bicepFileOption = CommandLineOptions.CreateBicepFileOption();
-        _parametersFileOption = CommandLineOptions.CreateParametersFileOption();
+        _bicepFileOption = CommandLineOptions.CreateFileOptionFlexible("--bicep-file",
+            "Path to the Bicep template file (.bicep) or parameters file (.bicepparam)", true);
+
+        _parametersFileOption = CommandLineOptions.CreateFileOptionFlexible("--parameters-file",
+            "Path to ARM JSON parameters file (.json) to use with the Bicep template", false, "-p");
+
+        _resourceGroupOption = CommandLineOptions.CreateStringOptionFlexible("--resource-group",
+            "Azure resource group name (required for ResourceGroup scope)", false);
+
+        _subscriptionOption = CommandLineOptions.CreateStringOptionFlexible("--subscription",
+            "Azure subscription ID (required for Subscription scope)", false);
+
+        _locationOption = CommandLineOptions.CreateStringOptionFlexible("--location",
+            "Azure region/location (required for Subscription scope)", false);
+
+        _ignoreConfigOption = CommandLineOptions.CreateFileOptionFlexible("--ignore-config",
+            "Path to a JSON file specifying which drift types or specific resources to ignore", false, "-l");
+
         _scopeOption = CommandLineOptions.CreateScopeOption();
-        _resourceGroupOption = CommandLineOptions.CreateResourceGroupOption();
-        _subscriptionOption = CommandLineOptions.CreateSubscriptionOption();
-        _locationOption = CommandLineOptions.CreateLocationOption();
         _outputFormatOption = CommandLineOptions.CreateOutputFormatOption();
         _simpleOutputOption = CommandLineOptions.CreateSimpleOutputOption();
-        _autofixOption = CommandLineOptions.CreateAutofixOption();
-        _ignoreConfigOption = CommandLineOptions.CreateIgnoreConfigOption();
         _showFilteredOption = CommandLineOptions.CreateShowFilteredOption();
 
         rootCommand.Add(_bicepFileOption);
@@ -66,7 +74,6 @@ public class BicepGuardCommand
         rootCommand.Add(_locationOption);
         rootCommand.Add(_outputFormatOption);
         rootCommand.Add(_simpleOutputOption);
-        rootCommand.Add(_autofixOption);
         rootCommand.Add(_ignoreConfigOption);
         rootCommand.Add(_showFilteredOption);
 
@@ -93,7 +100,6 @@ public class BicepGuardCommand
         Location = parseResult.GetValue(_locationOption!);
         OutputFormat = parseResult.GetValue(_outputFormatOption!);
         SimpleOutput = parseResult.GetValue(_simpleOutputOption!);
-        Autofix = parseResult.GetValue(_autofixOption!);
         IgnoreConfig = parseResult.GetValue(_ignoreConfigOption!);
         ShowFiltered = parseResult.GetValue(_showFilteredOption!);
 
@@ -120,7 +126,6 @@ public class BicepGuardCommand
                 Subscription,
                 Location,
                 OutputFormat,
-                Autofix,
                 IgnoreConfig,
                 ShowFiltered,
                 SimpleOutput);
@@ -137,7 +142,7 @@ public class BicepGuardCommand
                 OutputFormat);
 
             // Handle results
-            await HandleDriftResultAsync(result, detector);
+            HandleDriftResult(result, detector);
         }
         catch (InvalidOperationException)
         {
@@ -202,41 +207,42 @@ public class BicepGuardCommand
     }
 
     /// <summary>
-    /// Handles the drift detection result and autofix if requested.
+    /// Handles the drift detection result by reporting the outcome and exiting with an appropriate status code.
+    /// Autofix is currently not performed.
     /// </summary>
-    private async Task HandleDriftResultAsync(DriftDetectionResult result, DriftDetector detector)
+    private void HandleDriftResult(DriftDetectionResult result, DriftDetector detector)
     {
         if (result.HasDrift)
         {
             ConsoleOutput.WriteWarning("Configuration drift detected!", SimpleOutput);
+            Environment.Exit(0); // we dont want any non zero exit codes on drift. since we using this in pipelines.
+            //if (Autofix)
+            //{
+            //    ConsoleOutput.WriteAutofixAttempt(SimpleOutput);
+            //    var deploymentResult = await detector.DeployTemplateAsync(
+            //        BicepFile!,
+            //        ParametersFile,
+            //        Scope,
+            //        ResourceGroup,
+            //        Subscription,
+            //        Location);
 
-            if (Autofix)
-            {
-                ConsoleOutput.WriteAutofixAttempt(SimpleOutput);
-                var deploymentResult = await detector.DeployTemplateAsync(
-                    BicepFile!,
-                    ParametersFile,
-                    Scope,
-                    ResourceGroup,
-                    Subscription,
-                    Location);
-
-                if (deploymentResult.Success)
-                {
-                    ConsoleOutput.WriteAutofixSuccess(deploymentResult.DeploymentName, SimpleOutput);
-                    Environment.Exit(0);
-                }
-                else
-                {
-                    ConsoleOutput.WriteAutofixFailure(deploymentResult.ErrorMessage ?? "Unknown error", SimpleOutput);
-                    Environment.Exit(1);
-                }
-            }
-            else
-            {
-                ConsoleOutput.WriteTip("Use --autofix to automatically deploy template and fix drift.", SimpleOutput);
-                Environment.Exit(1);
-            }
+            //    if (deploymentResult.Success)
+            //    {
+            //        ConsoleOutput.WriteAutofixSuccess(deploymentResult.DeploymentName, SimpleOutput);
+            //        Environment.Exit(0);
+            //    }
+            //    else
+            //    {
+            //        ConsoleOutput.WriteAutofixFailure(deploymentResult.ErrorMessage ?? "Unknown error", SimpleOutput);
+            //        Environment.Exit(1);
+            //    }
+            //}
+            //else
+            //{
+            //    ConsoleOutput.WriteTip("Use --autofix to automatically deploy template and fix drift.", SimpleOutput);
+            //    Environment.Exit(1);
+            //}
         }
         else
         {
