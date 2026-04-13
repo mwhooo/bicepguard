@@ -217,7 +217,7 @@ jobs:
 
     - name: 🐛 Create Issue on Drift
       if: steps.drift.outputs.drift_detected == 'true' && inputs.create-issue == true
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       env:
         INPUT_SCOPE: ${{ inputs.scope }}
         INPUT_LOCATION: ${{ inputs.location }}
@@ -293,7 +293,7 @@ jobs:
 
     - name: ✅ Close Issue if No Drift
       if: steps.drift.outputs.drift_detected == 'false' && inputs.create-issue == true
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       env:
         INPUT_ENVIRONMENT_NAME: ${{ inputs.environment-name }}
       with:
