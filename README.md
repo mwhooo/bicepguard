@@ -86,7 +86,7 @@ docker run --rm \
 
 **Installation:**
 ```bash
-git clone <your-repo>
+git clone https://github.com/mwhooo/bicepguard.git
 cd bicepguard
 dotnet build
 ```
