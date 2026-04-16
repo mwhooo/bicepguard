@@ -119,7 +119,7 @@ jobs:
         bicep --version
 
     - name: 🔐 Azure Login (OIDC)
-      uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2
+      uses: azure/login@v3
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -209,7 +209,7 @@ jobs:
 
     - name: 📊 Upload Drift Report
       if: always()
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      uses: actions/upload-artifact@v7
       with:
         name: drift-report-${{ inputs.environment-name }}
         path: drift-report.json
@@ -217,7 +217,7 @@ jobs:
 
     - name: 🐛 Create Issue on Drift
       if: steps.drift.outputs.drift_detected == 'true' && inputs.create-issue == true
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+      uses: actions/github-script@v9
       env:
         INPUT_SCOPE: ${{ inputs.scope }}
         INPUT_LOCATION: ${{ inputs.location }}
@@ -293,7 +293,7 @@ jobs:
 
     - name: ✅ Close Issue if No Drift
       if: steps.drift.outputs.drift_detected == 'false' && inputs.create-issue == true
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+      uses: actions/github-script@v9
       env:
         INPUT_ENVIRONMENT_NAME: ${{ inputs.environment-name }}
       with:
