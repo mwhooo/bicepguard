@@ -30,10 +30,10 @@ jobs:
     
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v6
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       
     - name: ⚙️ Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
@@ -47,7 +47,7 @@ jobs:
       run: dotnet test tests/BicepGuard.Tests/BicepGuard.Tests.csproj --no-build --configuration Release --logger "trx;LogFileName=test-results.trx" --verbosity normal
       
     - name: 📊 Upload test results
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
       if: always()
       with:
         name: test-results
@@ -71,10 +71,10 @@ jobs:
         
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v6
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       
     - name: ⚙️ Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
@@ -98,10 +98,10 @@ jobs:
     
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v6
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       
     - name: ⚙️ Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
@@ -111,7 +111,7 @@ jobs:
         dotnet list BicepGuard.csproj package --deprecated || true
         
     - name: 🛡️ Initialize CodeQL
-      uses: github/codeql-action/init@v4
+      uses: github/codeql-action/init@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4
       with:
         languages: csharp
       continue-on-error: true
@@ -123,7 +123,7 @@ jobs:
       run: dotnet build BicepGuard.csproj --configuration Release --no-restore
       
     - name: 🔍 Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v4
+      uses: github/codeql-action/analyze@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4
       with:
         category: "/language:csharp"
       continue-on-error: true
@@ -134,7 +134,7 @@ jobs:
     
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v6
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       
     - name: ⚙️ Setup Azure CLI
       run: |
@@ -166,10 +166,10 @@ jobs:
     
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v6
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       
     - name: ⚙️ Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
@@ -197,7 +197,7 @@ jobs:
         echo ".NET Version: ${{ env.DOTNET_VERSION }}" >> ./artifacts/BUILD_INFO.txt
         
     - name: 📤 Upload artifacts
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
       with:
         name: release-artifacts
         path: ./artifacts/
