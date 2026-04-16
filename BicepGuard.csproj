@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <Product>Azure BicepGuard</Product>
     <Description>Detects configuration drift between Bicep templates and live Azure resources</Description>
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <ItemGroup>
